@@ -9,7 +9,7 @@ public class GymappApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(GymappApplication.class, args);
-		System.out.println(SpringVersion.getVersion());
+		System.out.println("Versión de Spring: " + SpringVersion.getVersion());
 	}
 
 }
