@@ -126,7 +126,6 @@
 							<configOptions>
 								<interfaceOnly>true</interfaceOnly>
 								<useSpringBoot3>true</useSpringBoot3>
-								<sourceFolder>src/main/java</sourceFolder>
 								<skipDefaultInterface>true</skipDefaultInterface>
 							</configOptions>
 						</configuration>
