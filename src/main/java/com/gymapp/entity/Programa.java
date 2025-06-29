@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -23,8 +23,8 @@ public class Programa {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long programaId;
-    ZonedDateTime fechaInicio;
-    ZonedDateTime fechaFin;
+    LocalDate fechaInicio;
+    LocalDate fechaFin;
 
     @OneToMany(mappedBy = "programa", cascade = CascadeType.ALL, orphanRemoval = true)
     List<ProgramaEjercicio> programaEjercicioList;

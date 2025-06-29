@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -25,7 +25,7 @@ public class Usuario {
     String apellidos;
     int altura;
     int peso;
-    ZonedDateTime fechaNacimiento;
+    LocalDate fechaNacimiento;
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Programa> programaList;
