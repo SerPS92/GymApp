@@ -5,13 +5,15 @@ import com.gymapp.model.Programa;
 import org.springframework.http.ResponseEntity;
 
 public class ProgramaController implements ProgramasApi {
+
     @Override
     public ResponseEntity<Void> programasPost(Programa programa) {
         return null;
     }
 
     @Override
-    public ResponseEntity<Programa> programasProgramaIdGet(Integer programaId) {
+    public ResponseEntity<Programa> programasProgramaIdGet(Long programaId) {
         return null;
     }
+
 }

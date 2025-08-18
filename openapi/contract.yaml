@@ -50,6 +50,7 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
       responses:
         '200':
           description: Ejercicio encontrado
@@ -66,6 +67,7 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
       requestBody:
         required: true
         content:
@@ -100,6 +102,7 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
       responses:
         '200':
           description: Usuario encontrado
@@ -116,6 +119,7 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
       requestBody:
         required: true
         content:
@@ -136,6 +140,7 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
       responses:
         '200':
           description: Programa encontrado
@@ -154,6 +159,7 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
       responses:
         '200':
           description: Lista de programas del usuario
@@ -185,6 +191,7 @@ components:
       properties:
         id:
           type: integer
+          format: int64
         nombre:
           type: string
         apellidos:
@@ -206,6 +213,7 @@ components:
       properties:
         id:
           type: integer
+          format: int64
         nombre:
           type: string
         grupoMuscular:
@@ -220,6 +228,7 @@ components:
       properties:
         id:
           type: integer
+          format: int64
         fechaInicio:
           type: string
           format: date
@@ -238,6 +247,7 @@ components:
       properties:
         id:
           type: integer
+          format: int64
         ejercicio:
           $ref: '#/components/schemas/Ejercicio'
         repeticiones:
@@ -252,6 +262,7 @@ components:
           type: string
         programaId:
           type: integer
+          format: int64
           description: ID del programa al que pertenece este ejercicio
 
 
