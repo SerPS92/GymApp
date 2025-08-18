@@ -12,6 +12,11 @@ public class ProgramaController implements ProgramasApi {
     }
 
     @Override
+    public ResponseEntity<Void> programasProgramaIdDelete(Long programaId) {
+        return null;
+    }
+
+    @Override
     public ResponseEntity<Programa> programasProgramaIdGet(Long programaId) {
         return null;
     }

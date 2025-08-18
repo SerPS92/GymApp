@@ -77,6 +77,21 @@ paths:
       responses:
         '200':
           description: Ejercicio actualizado
+    delete:
+      tags: [Ejercicios]
+      summary: Borrar un ejercicio
+      parameters:
+        - name: ejercicioId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Ejercicio borrado
+        '404':
+          description: Ejercicio no encontrado
 
   /usuarios:
     post:
@@ -129,6 +144,21 @@ paths:
       responses:
         '200':
           description: Usuario actualizado
+    delete:
+      tags: [Usuarios]
+      summary: Borrar un usuario
+      parameters:
+        - name: usuarioId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Usuario borrado
+        '404':
+          description: Usuario no encontrado
 
   /programas/{programaId}:
     get:
@@ -148,6 +178,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Programa'
+    delete:
+      tags: [Programas]
+      summary: Borrar un programa
+      parameters:
+        - name: programaId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Programa borrado
+        '404':
+          description: Programa no encontrado
 
   /usuarios/{usuarioId}/programa:
     get:
@@ -264,5 +309,3 @@ components:
           type: integer
           format: int64
           description: ID del programa al que pertenece este ejercicio
-
-

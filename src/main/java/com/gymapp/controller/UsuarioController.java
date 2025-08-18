@@ -15,6 +15,11 @@ public class UsuarioController implements UsuariosApi {
     }
 
     @Override
+    public ResponseEntity<Void> usuariosUsuarioIdDelete(Long usuarioId) {
+        return null;
+    }
+
+    @Override
     public ResponseEntity<Usuario> usuariosUsuarioIdGet(Long usuarioId) {
         return null;
     }
