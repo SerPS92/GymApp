@@ -1,4 +1,4 @@
-package com.gymapp.entity;
+package com.gymapp.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -17,7 +17,7 @@ public class ProgramaEjercicio {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long programaEjercicioId;
+    Long id;
     int repeticiones;
     int series;
     int descanso;

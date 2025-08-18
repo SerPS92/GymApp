@@ -1,4 +1,4 @@
-package com.gymapp.entity;
+package com.gymapp.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -17,9 +17,9 @@ public class Ejercicio {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long ejercicioId;
+    Long id;
     String nombre;
     String grupoMuscular;
-    //Imagen
+    //TODO imagen - añadir a contract.yaml
     String descripcion;
 }

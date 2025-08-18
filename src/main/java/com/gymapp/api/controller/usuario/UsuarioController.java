@@ -1,4 +1,4 @@
-package com.gymapp.controller;
+package com.gymapp.api.controller.usuario;
 
 import com.gymapp.api.UsuariosApi;
 import com.gymapp.model.Programa;

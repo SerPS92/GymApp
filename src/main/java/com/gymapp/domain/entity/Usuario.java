@@ -1,4 +1,4 @@
-package com.gymapp.entity;
+package com.gymapp.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -20,7 +20,7 @@ public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long usuarioId;
+    Long id;
     String nombre;
     String apellidos;
     int altura;

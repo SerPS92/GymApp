@@ -1,4 +1,4 @@
-package com.gymapp.shared;
+package com.gymapp.shared.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

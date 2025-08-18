@@ -1,4 +1,4 @@
-package com.gymapp.entity;
+package com.gymapp.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
@@ -22,7 +22,7 @@ public class Programa {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long programaId;
+    Long id;
     LocalDate fechaInicio;
     LocalDate fechaFin;
 
