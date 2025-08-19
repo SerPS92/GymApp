@@ -1,4 +1,4 @@
-package com.gymapp.api.controller.ejercicio;
+package com.gymapp.api.controller.user;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,52 +12,41 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+@RequestMapping("/api/usuarios")
+@Tag(name = "Usuarios")
+public interface UserApi {
 
-@RequestMapping("/api/ejercicios")
-@Tag(name = "Ejercicios")
-public interface EjercicioApi {
-
-    @Operation(summary = "Obtener todos los ejercicios")
+    @Operation(summary = "Crear un nuevo usuario")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Lista de ejercicios",
+            @ApiResponse(responseCode = "201", description = "Usuario creado",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = EjercicioResponse.class)))
-    })
-    @GetMapping
-    ResponseEntity<List<EjercicioResponse>> getEjercicios();
-
-    @Operation(summary = "Crear un nuevo ejercicio")
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Ejercicio creado",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = EjercicioResponse.class))),
+                            schema = @Schema(implementation = UsuarioResponse.class))),
             @ApiResponse(responseCode = "400", description = "Petición inválida",
                     content = @Content(mediaType = "application/problem+json",
                             schema = @Schema(implementation = ProblemDetail.class)))
     })
     @PostMapping
-    ResponseEntity<EjercicioResponse> createEjercicio(@Valid @RequestBody CreateEjercicioRequest request);
+    ResponseEntity<UsuarioResponse> createUsuario(@Valid @RequestBody CreateUsuarioRequest request);
 
-    @Operation(summary = "Obtener un ejercicio por ID")
+    @Operation(summary = "Obtener un usuario por ID")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Ejercicio encontrado",
+            @ApiResponse(responseCode = "200", description = "Usuario encontrado",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = EjercicioResponse.class))),
+                            schema = @Schema(implementation = UsuarioResponse.class))),
             @ApiResponse(responseCode = "404", description = "No encontrado",
                     content = @Content(mediaType = "application/problem+json",
                             schema = @Schema(implementation = ProblemDetail.class)))
     })
-    @GetMapping("/{ejercicioId}")
-    ResponseEntity<EjercicioResponse> getEjercicioById(
-            @Parameter(description = "ID del ejercicio", required = true)
-            @PathVariable Long ejercicioId);
+    @GetMapping("/{usuarioId}")
+    ResponseEntity<UsuarioResponse> getUsuarioById(
+            @Parameter(description = "ID del usuario", required = true)
+            @PathVariable Long usuarioId);
 
-    @Operation(summary = "Actualizar un ejercicio existente")
+    @Operation(summary = "Actualizar un usuario existente")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Ejercicio actualizado",
+            @ApiResponse(responseCode = "200", description = "Usuario actualizado",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = EjercicioResponse.class))),
+                            schema = @Schema(implementation = UsuarioResponse.class))),
             @ApiResponse(responseCode = "400", description = "Petición inválida",
                     content = @Content(mediaType = "application/problem+json",
                             schema = @Schema(implementation = ProblemDetail.class))),
@@ -65,19 +54,19 @@ public interface EjercicioApi {
                     content = @Content(mediaType = "application/problem+json",
                             schema = @Schema(implementation = ProblemDetail.class)))
     })
-    @PutMapping("/{ejercicioId}")
-    ResponseEntity<EjercicioResponse> updateEjercicio(
-            @PathVariable Long ejercicioId,
-            @Valid @RequestBody UpdateEjercicioRequest request);
+    @PutMapping("/{usuarioId}")
+    ResponseEntity<UsuarioResponse> updateUsuario(
+            @PathVariable Long usuarioId,
+            @Valid @RequestBody UpdateUsuarioRequest request);
 
-    @Operation(summary = "Borrar un ejercicio")
+    @Operation(summary = "Borrar un usuario")
     @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Ejercicio borrado"),
+            @ApiResponse(responseCode = "204", description = "Usuario borrado"),
             @ApiResponse(responseCode = "404", description = "No encontrado",
                     content = @Content(mediaType = "application/problem+json",
                             schema = @Schema(implementation = ProblemDetail.class)))
     })
-    @DeleteMapping("/{ejercicioId}")
-    ResponseEntity<Void> deleteEjercicio(@PathVariable Long ejercicioId);
+    @DeleteMapping("/{usuarioId}")
+    ResponseEntity<Void> deleteUsuario(@PathVariable Long usuarioId);
 }
 

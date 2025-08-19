@@ -16,17 +16,17 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Usuario {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    String nombre;
-    String apellidos;
-    int altura;
-    int peso;
-    LocalDate fechaNacimiento;
+    String firstName;
+    String lastName;
+    int height;
+    int weight;
+    LocalDate birthDate;
 
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Programa> programaList;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Program> programs;
 }

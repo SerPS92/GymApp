@@ -1,4 +1,4 @@
-package com.gymapp.api.controller.programa;
+package com.gymapp.api.controller.program;
 
 
 import com.gymapp.contract.programa.dto.request.CreateProgramaRequest;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Tag(name = "Programas")
-public interface ProgramaApi {
+public interface ProgramApi {
 
     @Operation(summary = "Crear un nuevo programa")
     @ApiResponses({
