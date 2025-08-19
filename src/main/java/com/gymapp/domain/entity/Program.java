@@ -12,7 +12,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Entity
-@Table(name = "programas")
+@Table(name = "programs")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,7 +26,7 @@ public class Program {
     LocalDate startDate;
     LocalDate endDate;
 
-    @OneToMany(mappedBy = "programa", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "program", cascade = CascadeType.ALL, orphanRemoval = true)
     List<ProgramExercise> programExercises;
 
     @ManyToOne

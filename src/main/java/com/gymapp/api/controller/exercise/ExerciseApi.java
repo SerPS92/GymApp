@@ -1,5 +1,10 @@
 package com.gymapp.api.controller.exercise;
 
+import com.gymapp.api.dto.exercise.request.ExerciseCreateRequest;
+import com.gymapp.api.dto.exercise.request.ExerciseFilterRequest;
+import com.gymapp.api.dto.exercise.request.ExerciseUpdateRequest;
+import com.gymapp.api.dto.exercise.response.ExerciseResponse;
+import com.gymapp.shared.dto.PageResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,72 +17,73 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
-@RequestMapping("/api/ejercicios")
-@Tag(name = "Ejercicios")
+@RequestMapping("/api/exercises")
+@Tag(name = "Exercises")
 public interface ExerciseApi {
 
-    @Operation(summary = "Obtener todos los ejercicios")
+    @Operation(summary = "Get exercises (paginated & filtered)")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Lista de ejercicios",
+            @ApiResponse(responseCode = "200", description = "Exercises page",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = EjercicioResponse.class)))
+                            schema = @Schema(implementation = PageResponseDTO.class)))
     })
     @GetMapping
-    ResponseEntity<List<EjercicioResponse>> getEjercicios();
+    ResponseEntity<PageResponseDTO<ExerciseResponse>> getExercises(
+            @ModelAttribute ExerciseFilterRequest filter,
+            @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "20") int size
+    );
 
-    @Operation(summary = "Crear un nuevo ejercicio")
+    @Operation(summary = "Create a new exercise")
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Ejercicio creado",
+            @ApiResponse(responseCode = "201", description = "Exercise created",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = EjercicioResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Petición inválida",
+                            schema = @Schema(implementation = ExerciseResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request",
                     content = @Content(mediaType = "application/problem+json",
                             schema = @Schema(implementation = ProblemDetail.class)))
     })
     @PostMapping
-    ResponseEntity<EjercicioResponse> createEjercicio(@Valid @RequestBody CreateEjercicioRequest request);
+    ResponseEntity<ExerciseResponse> createExercise(@Valid @RequestBody ExerciseCreateRequest request);
 
-    @Operation(summary = "Obtener un ejercicio por ID")
+    @Operation(summary = "Get exercise by ID")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Ejercicio encontrado",
+            @ApiResponse(responseCode = "200", description = "Exercise found",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = EjercicioResponse.class))),
-            @ApiResponse(responseCode = "404", description = "No encontrado",
+                            schema = @Schema(implementation = ExerciseResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Not found",
                     content = @Content(mediaType = "application/problem+json",
                             schema = @Schema(implementation = ProblemDetail.class)))
     })
-    @GetMapping("/{ejercicioId}")
-    ResponseEntity<EjercicioResponse> getEjercicioById(
-            @Parameter(description = "ID del ejercicio", required = true)
-            @PathVariable Long ejercicioId);
+    @GetMapping("/{exerciseId}")
+    ResponseEntity<ExerciseResponse> getExerciseById(
+            @Parameter(description = "Exercise ID", required = true)
+            @PathVariable Long exerciseId);
 
-    @Operation(summary = "Actualizar un ejercicio existente")
+    @Operation(summary = "Update an existing exercise")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Ejercicio actualizado",
+            @ApiResponse(responseCode = "200", description = "Exercise updated",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = EjercicioResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Petición inválida",
+                            schema = @Schema(implementation = ExerciseResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request",
                     content = @Content(mediaType = "application/problem+json",
                             schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "404", description = "No encontrado",
+            @ApiResponse(responseCode = "404", description = "Not found",
                     content = @Content(mediaType = "application/problem+json",
                             schema = @Schema(implementation = ProblemDetail.class)))
     })
-    @PutMapping("/{ejercicioId}")
-    ResponseEntity<EjercicioResponse> updateEjercicio(
-            @PathVariable Long ejercicioId,
-            @Valid @RequestBody UpdateEjercicioRequest request);
+    @PutMapping("/{exerciseId}")
+    ResponseEntity<ExerciseResponse> updateExercise(
+            @PathVariable Long exerciseId,
+            @Valid @RequestBody ExerciseUpdateRequest request);
 
-    @Operation(summary = "Borrar un ejercicio")
+    @Operation(summary = "Delete an exercise")
     @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Ejercicio borrado"),
-            @ApiResponse(responseCode = "404", description = "No encontrado",
+            @ApiResponse(responseCode = "204", description = "Exercise deleted"),
+            @ApiResponse(responseCode = "404", description = "Not found",
                     content = @Content(mediaType = "application/problem+json",
                             schema = @Schema(implementation = ProblemDetail.class)))
     })
-    @DeleteMapping("/{ejercicioId}")
-    ResponseEntity<Void> deleteEjercicio(@PathVariable Long ejercicioId);
+    @DeleteMapping("/{exerciseId}")
+    ResponseEntity<Void> deleteExercise(@PathVariable Long exerciseId);
 }
-

@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 @Entity
-@Table(name = "programa_ejercicio")
+@Table(name = "program_exercises")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,12 +24,12 @@ public class ProgramExercise {
     String day;
     String notes;
 
-    @ManyToOne
-    @JoinColumn(name = "id") // Falta en tu código, es necesario para que apunte a Programa
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "program_id")
     Program program;
 
-    @ManyToOne
-    @JoinColumn(name = "id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "exercise_id")
     Exercise exercise;
 
 

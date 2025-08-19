@@ -15,7 +15,7 @@ spring:
     init:
       mode: always
       platform: h2
-      data-locations: classpath:data.sql
+#      data-locations: classpath:data.sql
   jpa:
     defer-datasource-initialization: true
     hibernate:

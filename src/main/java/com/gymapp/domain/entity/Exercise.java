@@ -1,5 +1,6 @@
 package com.gymapp.domain.entity;
 
+import com.gymapp.domain.enums.MuscleGroup;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -8,7 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 @Entity
-@Table(name = "ejercicios")
+@Table(name = "exercises")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,8 +19,15 @@ public class Exercise {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
+
+    @Column(nullable = false)
     String name;
-    String muscleGroup; //TODO enum
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    MuscleGroup muscleGroup;
+
     //TODO imagen
+
     String description;
 }
