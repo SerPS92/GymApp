@@ -5,6 +5,7 @@ import com.gymapp.api.dto.exercise.request.ExerciseFilterRequest;
 import com.gymapp.api.dto.exercise.request.ExerciseUpdateRequest;
 import com.gymapp.api.dto.exercise.response.ExerciseResponse;
 import com.gymapp.shared.dto.PageResponseDTO;
+import com.gymapp.shared.error.BadRequestException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -13,7 +14,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.apache.coyote.BadRequestException;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,16 +23,16 @@ import org.springframework.web.bind.annotation.*;
 public interface ExerciseApi {
 
     @Operation(summary = "Get exercises (paginated & filtered)")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Exercises page",
+
+    @ApiResponse(responseCode = "200", description = "Exercises page",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = PageResponseDTO.class)))
-    })
+
     @GetMapping
     ResponseEntity<PageResponseDTO<ExerciseResponse>> getExercises(
-            @ModelAttribute ExerciseFilterRequest filter,
+            @Valid @ModelAttribute ExerciseFilterRequest filter,
             @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Page size") @RequestParam(defaultValue = "20") int size
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size
     ) throws BadRequestException;
 
     @Operation(summary = "Create a new exercise")
