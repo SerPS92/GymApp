@@ -9,17 +9,13 @@ import com.gymapp.application.service.exercise.ExerciseService;
 import com.gymapp.shared.dto.PageResponseDTO;
 import com.gymapp.shared.error.BadRequestException;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 
-@Validated
 @RestController
 @AllArgsConstructor
 @Slf4j
@@ -29,9 +25,7 @@ public class ExerciseController implements ExerciseApi{
 
     @Override
     public ResponseEntity<PageResponseDTO<ExerciseResponse>> getExercises(
-            @Valid ExerciseFilterRequest filter,
-            @PositiveOrZero int page,
-            @Positive int size) throws BadRequestException {
+            @Valid ExerciseFilterRequest filter, int page, int size) throws BadRequestException {
         Pageable pageable = PageRequest.of(page, size);
         PageResponseDTO<ExerciseResponse> responseDTO = exerciseService.search(filter, pageable);
         return ResponseEntity.ok(responseDTO);
