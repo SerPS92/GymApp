@@ -9,4 +9,5 @@ import org.springframework.data.domain.Pageable;
 public interface ExerciseService {
 
     PageResponseDTO<ExerciseResponse> search(ExerciseFilterRequest filterRequest, Pageable pageable) throws BadRequestException;
+    ExerciseResponse getById(Long id);
 }

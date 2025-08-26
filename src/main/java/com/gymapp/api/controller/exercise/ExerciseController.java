@@ -28,6 +28,7 @@ public class ExerciseController implements ExerciseApi{
             @Valid ExerciseFilterRequest filter, int page, int size) throws BadRequestException {
         Pageable pageable = PageRequest.of(page, size);
         PageResponseDTO<ExerciseResponse> responseDTO = exerciseService.search(filter, pageable);
+        log.info("Content size: {}", responseDTO.getContent().size());
         return ResponseEntity.ok(responseDTO);
     }
 
@@ -38,7 +39,9 @@ public class ExerciseController implements ExerciseApi{
 
     @Override
     public ResponseEntity<ExerciseResponse> getExerciseById(Long exerciseId) {
-        return null;
+        ExerciseResponse response = exerciseService.getById(exerciseId);
+        log.info("Exercise found: {}", response);
+        return ResponseEntity.ok(response);
     }
 
     @Override

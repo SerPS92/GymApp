@@ -6,10 +6,13 @@ import com.gymapp.application.mapper.exercise.ExerciseMapper;
 import com.gymapp.domain.entity.Exercise;
 import com.gymapp.infrastructure.persistence.ExerciseJpaRepository;
 import com.gymapp.shared.dto.PageResponseDTO;
+import com.gymapp.shared.error.AppException;
 import com.gymapp.shared.error.BadRequestException;
+import com.gymapp.shared.error.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -56,5 +59,13 @@ public class ExerciseServiceImpl implements ExerciseService{
                 .empty(page.isEmpty())
                 .content(content)
                 .build();
+    }
+
+    @Override
+    public ExerciseResponse getById(Long id) {
+        Exercise response = repository.findById(id).orElseThrow(()->
+                new AppException(HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND, "El ejercicio con el id %d no existe".formatted(id)));
+
+        return exerciseMapper.toResponse(response);
     }
 }
