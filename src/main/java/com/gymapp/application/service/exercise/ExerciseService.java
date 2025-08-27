@@ -1,5 +1,6 @@
 package com.gymapp.application.service.exercise;
 
+import com.gymapp.api.dto.exercise.request.ExerciseCreateRequest;
 import com.gymapp.api.dto.exercise.request.ExerciseFilterRequest;
 import com.gymapp.api.dto.exercise.response.ExerciseResponse;
 import com.gymapp.shared.dto.PageResponseDTO;
@@ -10,4 +11,6 @@ public interface ExerciseService {
 
     PageResponseDTO<ExerciseResponse> search(ExerciseFilterRequest filterRequest, Pageable pageable) throws BadRequestException;
     ExerciseResponse getById(Long id);
+    ExerciseResponse createExercise(ExerciseCreateRequest request);
+
 }

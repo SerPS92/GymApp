@@ -10,6 +10,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ExerciseJpaRepository extends JpaRepository<Exercise, Long> {
 
+    boolean existsByNameIgnoreCaseAndMuscleGroup(String name, MuscleGroup muscleGroup);
+
     Page<Exercise> findByNameContainingIgnoreCase(String name, Pageable pageable);
     Page<Exercise> findByMuscleGroup(MuscleGroup muscleGroup, Pageable pageable);
 }

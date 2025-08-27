@@ -1,5 +1,6 @@
 package com.gymapp.application.service.exercise;
 
+import com.gymapp.api.dto.exercise.request.ExerciseCreateRequest;
 import com.gymapp.api.dto.exercise.request.ExerciseFilterRequest;
 import com.gymapp.api.dto.exercise.response.ExerciseResponse;
 import com.gymapp.application.mapper.exercise.ExerciseMapper;
@@ -8,6 +9,7 @@ import com.gymapp.infrastructure.persistence.ExerciseJpaRepository;
 import com.gymapp.shared.dto.PageResponseDTO;
 import com.gymapp.shared.error.AppException;
 import com.gymapp.shared.error.BadRequestException;
+import com.gymapp.shared.error.ConflictException;
 import com.gymapp.shared.error.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -67,5 +69,15 @@ public class ExerciseServiceImpl implements ExerciseService{
                 new AppException(HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND, "El ejercicio con el id %d no existe".formatted(id)));
 
         return exerciseMapper.toResponse(response);
+    }
+
+    @Override
+    public ExerciseResponse createExercise(ExerciseCreateRequest request) {
+        if(repository.existsByNameIgnoreCaseAndMuscleGroup(request.getName().trim(), request.getMuscleGroup())){
+            throw new ConflictException("El ejercicio ya existe");
+        }
+        Exercise exercise = exerciseMapper.toEntity(request);
+        Exercise saved = repository.save(exercise);
+        return exerciseMapper.toResponse(saved);
     }
 }

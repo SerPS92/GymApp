@@ -8,6 +8,7 @@ import com.gymapp.shared.dto.PageResponseDTO;
 import com.gymapp.shared.error.BadRequestException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -38,12 +39,17 @@ public interface ExerciseApi {
     @Operation(summary = "Create a new exercise")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Exercise created",
+                    headers = @Header(name = "Location", description = "URI of the created exercise"),
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ExerciseResponse.class))),
             @ApiResponse(responseCode = "400", description = "Invalid request",
                     content = @Content(mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "409", description = "Exercise already exists",
+                    content = @Content(mediaType = "application/problem+json",
                             schema = @Schema(implementation = ProblemDetail.class)))
     })
+
     @PostMapping
     ResponseEntity<ExerciseResponse> createExercise(@Valid @RequestBody ExerciseCreateRequest request);
 

@@ -20,7 +20,7 @@ public class Exercise {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     String name;
 
     @Enumerated(EnumType.STRING)

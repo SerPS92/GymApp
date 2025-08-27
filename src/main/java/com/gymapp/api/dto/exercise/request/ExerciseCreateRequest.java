@@ -3,6 +3,7 @@ package com.gymapp.api.dto.exercise.request;
 import com.gymapp.domain.enums.MuscleGroup;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,7 +21,7 @@ public class ExerciseCreateRequest {
     @Schema(description = "Exercise name.", example = "Bench Press")
     private String name;
 
-    @NotBlank(message = "muscleGroup must not be blank")
+    @NotNull(message = "muscleGroup must not be null")
     @Schema(description = "Primary muscle group (enum/string).", example = "CHEST")
     private MuscleGroup muscleGroup;
 

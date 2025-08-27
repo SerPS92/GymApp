@@ -34,7 +34,16 @@ public class ExerciseController implements ExerciseApi{
 
     @Override
     public ResponseEntity<ExerciseResponse> createExercise(ExerciseCreateRequest request) {
-        return null;
+        ExerciseResponse created = exerciseService.createExercise(request);
+
+        java.net.URI location = org.springframework.web.servlet.support.ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(created.getId())
+                .toUri();
+
+        log.info("Exercise created: {}", created);
+        return ResponseEntity.created(location).body(created);
     }
 
     @Override
