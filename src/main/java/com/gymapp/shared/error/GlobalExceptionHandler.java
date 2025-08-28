@@ -2,12 +2,15 @@ package com.gymapp.shared.error;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.net.URI;
 import java.util.LinkedHashMap;
@@ -19,6 +22,7 @@ import static com.gymapp.shared.error.ErrorConstants.*;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
 
 
 
@@ -122,6 +126,55 @@ public class GlobalExceptionHandler {
         pd.setProperty(ERRORS, errors);
         pd.setProperty(PATH, req.getRequestURI());
         return pd;
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ProblemDetail> handleResponseStatusException(
+            org.springframework.web.server.ResponseStatusException ex,
+            jakarta.servlet.http.HttpServletRequest request) {
+
+        org.springframework.http.HttpStatusCode status = ex.getStatusCode();
+        org.springframework.http.HttpStatus http = org.springframework.http.HttpStatus.resolve(status.value());
+
+        ProblemDetail pd = ProblemDetail.forStatus(status);
+        pd.setTitle(http != null ? http.getReasonPhrase() : ERROR);
+        pd.setDetail(ex.getReason() != null ? ex.getReason() : pd.getTitle());
+        pd.setType(java.net.URI.create(URN_PROBLEM + (
+                http == org.springframework.http.HttpStatus.NOT_FOUND ? NOT_FOUND : ERROR)));
+        pd.setInstance(java.net.URI.create(request.getRequestURI()));
+        pd.setProperty(PATH, request.getRequestURI());
+        pd.setProperty(CODE, (http == org.springframework.http.HttpStatus.NOT_FOUND ? NOT_FOUND : ERROR));
+        return ResponseEntity.status(status).body(pd);
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ProblemDetail> handleConflict(
+            ConflictException ex,
+            jakarta.servlet.http.HttpServletRequest request) {
+
+        ProblemDetail pd = ProblemDetail.forStatus(org.springframework.http.HttpStatus.CONFLICT);
+        pd.setTitle(CONFLICT);
+        pd.setDetail(ex.getMessage());
+        pd.setType(java.net.URI.create(URN_PROBLEM_CONFLICT));
+        pd.setInstance(java.net.URI.create(request.getRequestURI()));
+        pd.setProperty(PATH, request.getRequestURI());
+        pd.setProperty(CODE, CONFLICT);
+        return ResponseEntity.status(org.springframework.http.HttpStatus.CONFLICT).body(pd);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ProblemDetail> handleDataIntegrity(
+            org.springframework.dao.DataIntegrityViolationException ex,
+            jakarta.servlet.http.HttpServletRequest request) {
+
+        ProblemDetail pd = ProblemDetail.forStatus(org.springframework.http.HttpStatus.CONFLICT);
+        pd.setTitle(CONFLICT);
+        pd.setDetail("Violación de integridad de datos.");
+        pd.setType(java.net.URI.create(URN_PROBLEM_CONFLICT));
+        pd.setInstance(java.net.URI.create(request.getRequestURI()));
+        pd.setProperty(PATH, request.getRequestURI());
+        pd.setProperty(CODE, CONFLICT);
+        return ResponseEntity.status(org.springframework.http.HttpStatus.CONFLICT).body(pd);
     }
 
 }

@@ -12,11 +12,13 @@ import com.gymapp.shared.error.BadRequestException;
 import com.gymapp.shared.error.ConflictException;
 import com.gymapp.shared.error.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -79,5 +81,17 @@ public class ExerciseServiceImpl implements ExerciseService{
         Exercise exercise = exerciseMapper.toEntity(request);
         Exercise saved = repository.save(exercise);
         return exerciseMapper.toResponse(saved);
+    }
+
+    @Override
+    public void deleteExercise(Long id) {
+        if (!repository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND ,"No existe el ejercicio con id " + id);
+        }
+        try {
+            repository.deleteById(id);
+        } catch (DataIntegrityViolationException ex) {
+            throw new ConflictException("No se puede eliminar: el ejercicio está referenciado.", ex);
+        }
     }
 }

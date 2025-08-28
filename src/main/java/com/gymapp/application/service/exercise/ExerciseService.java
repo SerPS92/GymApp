@@ -12,5 +12,6 @@ public interface ExerciseService {
     PageResponseDTO<ExerciseResponse> search(ExerciseFilterRequest filterRequest, Pageable pageable) throws BadRequestException;
     ExerciseResponse getById(Long id);
     ExerciseResponse createExercise(ExerciseCreateRequest request);
+    void deleteExercise(Long id);
 
 }

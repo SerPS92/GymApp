@@ -60,6 +60,8 @@ public class ExerciseController implements ExerciseApi{
 
     @Override
     public ResponseEntity<Void> deleteExercise(Long exerciseId) {
-        return null;
+        exerciseService.deleteExercise(exerciseId);
+        log.info("Ejercicio eliminado. ID: {}", exerciseId);
+        return ResponseEntity.noContent().build();
     }
 }
