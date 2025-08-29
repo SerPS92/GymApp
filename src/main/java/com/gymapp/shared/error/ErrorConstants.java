@@ -4,24 +4,11 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class ErrorConstants {
+public class ErrorConstants {
 
+    public static final String THE_EXERCISE_WITH_ID_D_DOES_NOT_EXIST = "The exercise with id %d does not exist";
+    public static final String CANNOT_DELETE_THE_EXERCISE_IS_REFERENCED = "Cannot delete: the exercise is referenced.";
+    public static final String THE_EXERCISE_ALREADY_EXISTS = "The exercise already exists";
+    public static final String SEND_EXACTLY_ONE_FILTER_NAME_OR_MUSCLE_GROUP = "Send exactly one filter: name OR muscleGroup.";
 
-    public static final String URN_PROBLEM_VALIDATION_ERROR = "urn:problem:validation_error";
-    public static final String URN_PROBLEM_BAD_REQUEST = "urn:problem:bad_request";
-    public static final String URN_PROBLEM_INTERNAL_ERROR = "urn:problem:internal_error";
-    public static final String URN_PROBLEM_CONFLICT = "urn:problem:conflict";
-    public static final String VALIDATION_FAILED = "Validation failed";
-    public static final String INVALID_REQUEST_PARAMETERS = "Invalid request parameters";
-    public static final String UNEXPECTED_ERROR = "Unexpected error";
-    public static final String CONFLICT = "CONFLICT";
-    public static final String CODE = "code";
-    public static final String PATH = "path";
-    public static final String URN_PROBLEM = "urn:problem:";
-    public static final String FIELD = "field";
-    public static final String MESSAGE = "message";
-    public static final String REJECTED_VALUE = "rejectedValue";
-    public static final String ERRORS = "errors";
-    public static final String ERROR = "Error";
-    public static final String NOT_FOUND = "not_found";
 }

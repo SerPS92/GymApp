@@ -6,10 +6,12 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.net.URI;
@@ -17,14 +19,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.gymapp.shared.error.ErrorConstants.*;
+import static com.gymapp.shared.error.GlobalExceptionHandlerConstants.*;
 
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-
-
 
     @ExceptionHandler(AppException.class)
     public ProblemDetail handleAppException(AppException ex, HttpServletRequest req) {
@@ -92,6 +91,7 @@ public class GlobalExceptionHandler {
         var pd = ProblemDetail.forStatusAndDetail(status, INVALID_REQUEST_PARAMETERS);
         pd.setTitle(status.getReasonPhrase());
         pd.setProperty(CODE, ErrorCode.BAD_REQUEST.name());
+        pd.setProperty(PATH, req.getRequestURI());
         pd.setType(URI.create(URN_PROBLEM_BAD_REQUEST));
         pd.setInstance(URI.create(req.getRequestURI()));
         return pd;
@@ -143,7 +143,7 @@ public class GlobalExceptionHandler {
                 http == org.springframework.http.HttpStatus.NOT_FOUND ? NOT_FOUND : ERROR)));
         pd.setInstance(java.net.URI.create(request.getRequestURI()));
         pd.setProperty(PATH, request.getRequestURI());
-        pd.setProperty(CODE, (http == org.springframework.http.HttpStatus.NOT_FOUND ? NOT_FOUND : ERROR));
+        pd.setProperty(CODE, (http == HttpStatus.NOT_FOUND ? NOT_FOUND : ERROR));
         return ResponseEntity.status(status).body(pd);
     }
 
@@ -158,7 +158,7 @@ public class GlobalExceptionHandler {
         pd.setType(java.net.URI.create(URN_PROBLEM_CONFLICT));
         pd.setInstance(java.net.URI.create(request.getRequestURI()));
         pd.setProperty(PATH, request.getRequestURI());
-        pd.setProperty(CODE, CONFLICT);
+        pd.setProperty(CODE, HttpStatus.CONFLICT.name());
         return ResponseEntity.status(org.springframework.http.HttpStatus.CONFLICT).body(pd);
     }
 
@@ -169,12 +169,61 @@ public class GlobalExceptionHandler {
 
         ProblemDetail pd = ProblemDetail.forStatus(org.springframework.http.HttpStatus.CONFLICT);
         pd.setTitle(CONFLICT);
-        pd.setDetail("Violación de integridad de datos.");
+        pd.setDetail(DATA_INTEGRITY_VIOLATION);
         pd.setType(java.net.URI.create(URN_PROBLEM_CONFLICT));
         pd.setInstance(java.net.URI.create(request.getRequestURI()));
         pd.setProperty(PATH, request.getRequestURI());
-        pd.setProperty(CODE, CONFLICT);
+        pd.setProperty(CODE, HttpStatus.CONFLICT.name());
         return ResponseEntity.status(org.springframework.http.HttpStatus.CONFLICT).body(pd);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ProblemDetail> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex,
+            HttpServletRequest request) {
+
+        Throwable cause = ex.getCause();
+
+        if (cause instanceof com.fasterxml.jackson.databind.exc.InvalidFormatException ife
+                && ife.getTargetType() != null
+                && ife.getTargetType().isEnum()) {
+
+            String allowed = java.util.Arrays.stream(ife.getTargetType().getEnumConstants())
+                    .map(Object::toString)
+                    .collect(java.util.stream.Collectors.joining(DELIMITER));
+
+            ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+            pd.setTitle(INVALID_ENUM_VALUE);
+            pd.setDetail(INVALID_VALUE_FOR_AN_ENUM_ALLOWED_VALUES + allowed);
+            pd.setType(java.net.URI.create(URN_PROBLEM_INVALID_ENUM));
+            pd.setInstance(java.net.URI.create(request.getRequestURI()));
+            pd.setProperty(PATH, request.getRequestURI());
+            pd.setProperty(CODE, HttpStatus.BAD_REQUEST.name());
+            return ResponseEntity.badRequest().body(pd);
+        }
+
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        pd.setTitle(INVALID_REQUEST_BODY);
+        pd.setDetail(MALFORMED_JSON_OR_INCORRECT_DATA_TYPES);
+        pd.setType(java.net.URI.create(URN_PROBLEM_BAD_REQUEST));
+        pd.setInstance(java.net.URI.create(request.getRequestURI()));
+        pd.setProperty(PATH, request.getRequestURI());
+        pd.setProperty(CODE, HttpStatus.BAD_REQUEST.name());
+        return ResponseEntity.badRequest().body(pd);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ProblemDetail handleTypeMismatch(
+            org.springframework.web.method.annotation.MethodArgumentTypeMismatchException ex,
+            HttpServletRequest req) {
+        var status = HttpStatus.BAD_REQUEST;
+        var pd = ProblemDetail.forStatusAndDetail(status, INVALID_REQUEST_PARAMETERS);
+        pd.setTitle(status.getReasonPhrase());
+        pd.setType(URI.create(URN_PROBLEM_BAD_REQUEST));
+        pd.setInstance(URI.create(req.getRequestURI()));
+        pd.setProperty(CODE, HttpStatus.BAD_REQUEST.name());
+        pd.setProperty(PATH, req.getRequestURI());
+        return pd;
     }
 
 }

@@ -55,13 +55,15 @@ public class ExerciseController implements ExerciseApi{
 
     @Override
     public ResponseEntity<ExerciseResponse> updateExercise(Long exerciseId, ExerciseUpdateRequest request) {
-        return null;
+        ExerciseResponse updated = exerciseService.updateExercise(exerciseId, request);
+        log.info("Exercise with Id: {} is updated", exerciseId);
+        return ResponseEntity.ok(updated);
     }
 
     @Override
     public ResponseEntity<Void> deleteExercise(Long exerciseId) {
         exerciseService.deleteExercise(exerciseId);
-        log.info("Ejercicio eliminado. ID: {}", exerciseId);
+        log.info("Exercise deleted with ID: {}", exerciseId);
         return ResponseEntity.noContent().build();
     }
 }

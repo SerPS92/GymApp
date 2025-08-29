@@ -67,7 +67,7 @@ public interface ExerciseApi {
             @Parameter(description = "Exercise ID", required = true)
             @PathVariable Long exerciseId);
 
-    @Operation(summary = "Update an existing exercise")
+    @Operation(summary = "Partially update an existing exercise (PATCH)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Exercise updated",
                     content = @Content(mediaType = "application/json",
@@ -77,12 +77,21 @@ public interface ExerciseApi {
                             schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "404", description = "Not found",
                     content = @Content(mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "409", description = "Conflict (duplicate exercise)",
+                    content = @Content(mediaType = "application/problem+json",
                             schema = @Schema(implementation = ProblemDetail.class)))
     })
-    @PutMapping("/{exerciseId}")
+    @PatchMapping(
+            value = "/{exerciseId}",
+            consumes = "application/json",
+            produces = "application/json"
+    )
     ResponseEntity<ExerciseResponse> updateExercise(
+            @Parameter(description = "Exercise ID", required = true)
             @PathVariable Long exerciseId,
             @Valid @RequestBody ExerciseUpdateRequest request);
+
 
     @Operation(summary = "Delete an exercise")
     @ApiResponses({
