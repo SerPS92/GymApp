@@ -19,6 +19,7 @@ public class ExerciseCreateRequest {
 
     @NotBlank(message = "name must not be blank")
     @Schema(description = "Exercise name.", example = "Bench Press")
+    @Size(max = 50, message = "name must not exceed 1000 characters")
     private String name;
 
     @NotNull(message = "muscleGroup must not be null")

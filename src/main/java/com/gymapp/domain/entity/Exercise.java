@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 @Entity
-@Table(name = "exercises")
+@Table(name = "exercises", uniqueConstraints = @UniqueConstraint(columnNames = {"name", "muscle_group"}))
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -28,6 +28,6 @@ public class Exercise {
     MuscleGroup muscleGroup;
 
     //TODO imagen
-
+    @Column(length = 1000)
     String description;
 }
