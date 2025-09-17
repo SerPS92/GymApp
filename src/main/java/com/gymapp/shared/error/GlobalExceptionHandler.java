@@ -21,7 +21,6 @@ import java.util.Map;
 
 import static com.gymapp.shared.error.GlobalExceptionHandlerConstants.*;
 
-
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -50,7 +49,7 @@ public class GlobalExceptionHandler {
                     Map<String, Object> m = new LinkedHashMap<>();
                     m.put(FIELD, fe.getField());
                     m.put(MESSAGE, fe.getDefaultMessage());
-                    m.put(REJECTED_VALUE, fe.getRejectedValue()); // puede ser null
+                    m.put(REJECTED_VALUE, fe.getRejectedValue());
                     return m;
                 })
                 .toList();
@@ -74,7 +73,7 @@ public class GlobalExceptionHandler {
                     Map<String, Object> m = new LinkedHashMap<>();
                     m.put(FIELD, fe.getField());
                     m.put(MESSAGE, fe.getDefaultMessage());
-                    m.put(REJECTED_VALUE, fe.getRejectedValue()); // puede ser null
+                    m.put(REJECTED_VALUE, fe.getRejectedValue());
                     return m;
                 })
                 .toList();
@@ -87,13 +86,17 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ProblemDetail handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest req) {
-        var status = HttpStatus.BAD_REQUEST;
-        var pd = ProblemDetail.forStatusAndDetail(status, INVALID_REQUEST_PARAMETERS);
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(status, INVALID_REQUEST_PARAMETERS);
         pd.setTitle(status.getReasonPhrase());
         pd.setProperty(CODE, ErrorCode.BAD_REQUEST.name());
         pd.setProperty(PATH, req.getRequestURI());
         pd.setType(URI.create(URN_PROBLEM_BAD_REQUEST));
         pd.setInstance(URI.create(req.getRequestURI()));
+
+        Map<String, Object> error = new LinkedHashMap<>();
+        error.put(MESSAGE, ex.getMessage() != null ? ex.getMessage() : INVALID_REQUEST_PARAMETERS);
+        pd.setProperty(ERRORS, List.of(error));
         return pd;
     }
 
@@ -106,25 +109,34 @@ public class GlobalExceptionHandler {
         pd.setProperty(PATH, req.getRequestURI());
         pd.setType(URI.create(URN_PROBLEM_INTERNAL_ERROR));
         pd.setInstance(URI.create(req.getRequestURI()));
+
+        Map<String, Object> error = new LinkedHashMap<>();
+        error.put(MESSAGE, ex.getMessage() != null ? ex.getMessage() : INVALID_REQUEST_PARAMETERS);
+        pd.setProperty(ERRORS, List.of(error));
         return pd;
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ProblemDetail handleConstraintViolation(ConstraintViolationException ex, HttpServletRequest req) {
-        var status = HttpStatus.BAD_REQUEST;
-        var pd = ProblemDetail.forStatusAndDetail(status, VALIDATION_FAILED);
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(status, VALIDATION_FAILED);
         pd.setTitle(status.getReasonPhrase());
-        pd.setProperty(CODE, ErrorCode.VALIDATION_ERROR.name());
         pd.setType(URI.create(URN_PROBLEM_VALIDATION_ERROR));
         pd.setInstance(URI.create(req.getRequestURI()));
-        var errors = ex.getConstraintViolations().stream()
-                .map(v -> Map.of(
-                        FIELD, v.getPropertyPath().toString(),
-                        MESSAGE, v.getMessage(),
-                        REJECTED_VALUE, v.getInvalidValue()))
-                .toList();
-        pd.setProperty(ERRORS, errors);
+        pd.setProperty(CODE, ErrorCode.VALIDATION_ERROR.name());
         pd.setProperty(PATH, req.getRequestURI());
+
+        List<Map<String, Object>> errors = ex.getConstraintViolations().stream()
+                .map(v -> {
+                    Map<String, Object> m = new LinkedHashMap<>();
+                    m.put(FIELD, v.getPropertyPath().toString());
+                    m.put(MESSAGE, v.getMessage());
+                    m.put(REJECTED_VALUE, v.getInvalidValue());
+                    return m;
+                })
+                .toList();
+
+        pd.setProperty(ERRORS, errors);
         return pd;
     }
 
@@ -216,13 +228,19 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleTypeMismatch(
             org.springframework.web.method.annotation.MethodArgumentTypeMismatchException ex,
             HttpServletRequest req) {
-        var status = HttpStatus.BAD_REQUEST;
-        var pd = ProblemDetail.forStatusAndDetail(status, INVALID_REQUEST_PARAMETERS);
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(status, INVALID_REQUEST_PARAMETERS);
         pd.setTitle(status.getReasonPhrase());
         pd.setType(URI.create(URN_PROBLEM_BAD_REQUEST));
         pd.setInstance(URI.create(req.getRequestURI()));
         pd.setProperty(CODE, HttpStatus.BAD_REQUEST.name());
         pd.setProperty(PATH, req.getRequestURI());
+
+        Map<String, Object> error = new LinkedHashMap<>();
+        error.put(FIELD, ex.getName());
+        error.put(REJECTED_VALUE, ex.getValue());
+        error.put(MESSAGE, INVALID_VALUE_FOR_PARAMETER);
+        pd.setProperty(ERRORS, List.of(error));
         return pd;
     }
 

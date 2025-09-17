@@ -13,6 +13,7 @@ public final class GlobalExceptionHandlerConstants {
     public static final String URN_PROBLEM_CONFLICT = "urn:problem:conflict";
     public static final String URN_PROBLEM_INVALID_ENUM = "urn:problem:invalid_enum";
     public static final String VALIDATION_FAILED = "Validation failed";
+    public static final String INVALID_VALUE_FOR_PARAMETER = "Invalid value for parameter";
     public static final String INVALID_REQUEST_PARAMETERS = "Invalid request parameters";
     public static final String DATA_INTEGRITY_VIOLATION = "Data integrity violation.";
     public static final String UNEXPECTED_ERROR = "Unexpected error";
