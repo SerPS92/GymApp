@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 public interface ExerciseJpaRepository extends JpaRepository<Exercise, Long> {
 
     boolean existsByNameIgnoreCaseAndMuscleGroup(String name, MuscleGroup muscleGroup);
+    boolean existsByNameIgnoreCaseAndMuscleGroupAndIdNot(String name, MuscleGroup muscleGroup, Long id);
 
     Page<Exercise> findByNameContainingIgnoreCase(String name, Pageable pageable);
     Page<Exercise> findByMuscleGroup(MuscleGroup muscleGroup, Pageable pageable);

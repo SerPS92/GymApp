@@ -33,8 +33,7 @@ import java.util.Optional;
 
 import static com.gymapp.shared.error.ErrorConstants.THE_EXERCISE_WITH_ID_D_DOES_NOT_EXIST;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -272,7 +271,7 @@ class ExerciseServiceTest {
     @Test
     @DisplayName("Throws NotFound when updating a non-existing id")
     void updateExercise_notFound() {
-        long missingId = 999L;
+        Long missingId = 999L;
 
         ExerciseUpdateRequest req = new ExerciseUpdateRequest();
         req.setDescription(JsonNullable.of("new description"));
@@ -287,6 +286,93 @@ class ExerciseServiceTest {
     }
 
 
+    @Test
+    @DisplayName("Throws Conflict when updating to name+group that belongs to a different id")
+    void updateExercise_conflict_excludingSelf() {
+        Long id = 1L;
+        Exercise existing = new Exercise();
+        existing.setId(id);
+        existing.setName("Incline Press");
+        existing.setMuscleGroup(MuscleGroup.CHEST);
+        existing.setDescription("old");
+
+        ExerciseUpdateRequest req = new ExerciseUpdateRequest();
+        req.setName(JsonNullable.of("Bench Press"));
+        req.setMuscleGroup(JsonNullable.of(MuscleGroup.CHEST));
+
+        when(repository.findById(id)).thenReturn(Optional.of(existing));
+        when(repository.existsByNameIgnoreCaseAndMuscleGroupAndIdNot("Bench Press", MuscleGroup.CHEST, id))
+                .thenReturn(true);
+
+        ConflictException ex = assertThrows(ConflictException.class,
+                () -> exerciseService.updateExercise(id, req));
+
+        assertEquals(HttpStatus.CONFLICT, ex.getStatus());
+        assertEquals(ErrorCode.CONFLICT, ex.getCode());
+    }
+
+    @Test
+    @DisplayName("Updates when only description changes; uniqueness check excludes current id")
+    void updateExercise_onlyDescription_ok() {
+        // arrange
+        Long id = 1L;
+        Exercise existing = new Exercise();
+        existing.setId(id);
+        existing.setName("Incline Press");
+        existing.setMuscleGroup(MuscleGroup.CHEST);
+        existing.setDescription("old");
+
+        ExerciseUpdateRequest req = new ExerciseUpdateRequest();
+        req.setDescription(JsonNullable.of("new"));
+
+        Exercise updated = new Exercise();
+        updated.setId(id);
+        updated.setName("Incline Press");
+        updated.setMuscleGroup(MuscleGroup.CHEST);
+        updated.setDescription("new");
+
+        ExerciseResponse resp = ExerciseResponse.builder()
+                .id(id).name("Incline Press").muscleGroup(MuscleGroup.CHEST).description("new")
+                .build();
+
+        when(repository.findById(id)).thenReturn(Optional.of(existing));
+        when(repository.existsByNameIgnoreCaseAndMuscleGroupAndIdNot("Incline Press", MuscleGroup.CHEST, id))
+                .thenReturn(false);
+        when(repository.save(any(Exercise.class))).thenReturn(updated);
+        when(exerciseMapper.toResponse(updated)).thenReturn(resp);
+
+        ExerciseResponse result = exerciseService.updateExercise(id, req);
+
+        assertEquals(id, result.getId());
+        assertEquals("Incline Press", result.getName());
+        assertEquals(MuscleGroup.CHEST, result.getMuscleGroup());
+        assertEquals("new", result.getDescription());
+    }
+
+
+
+    @Test
+    @DisplayName("Deletes existing exercise without errors")
+    void deleteExercise_ok() {
+        Long id = 1L;
+
+        when(repository.existsById(id)).thenReturn(true);
+
+        assertDoesNotThrow(() -> exerciseService.deleteExercise(id));
+    }
+
+    @Test
+    @DisplayName("Throws NotFound when deleting a non-existing id")
+    void deleteExercise_notFound() {
+        Long missingId = 999L;
+        when(repository.existsById(missingId)).thenReturn(false);
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+                () -> exerciseService.deleteExercise(missingId));
+
+        assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+        assertEquals(THE_EXERCISE_WITH_ID_D_DOES_NOT_EXIST.formatted(missingId), ex.getReason());
+    }
 
 
 }

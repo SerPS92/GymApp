@@ -107,6 +107,10 @@ public class ExerciseServiceImpl implements ExerciseService{
             return exerciseMapper.toResponse(existing);
         }
 
+        if (repository.existsByNameIgnoreCaseAndMuscleGroupAndIdNot(targetName, targetMuscleGroup, id)) {
+            throw new ConflictException(THE_EXERCISE_ALREADY_EXISTS);
+        }
+
         existing.setName(targetName);
         existing.setMuscleGroup(targetMuscleGroup);
         existing.setDescription(targetDescription);
