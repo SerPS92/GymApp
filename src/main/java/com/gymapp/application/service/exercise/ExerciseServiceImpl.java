@@ -90,6 +90,7 @@ public class ExerciseServiceImpl implements ExerciseService{
 
     @Override
     public ExerciseResponse updateExercise(Long id, ExerciseUpdateRequest request) {
+        //TODO revisar: falta logica para evitar cambiar un ejercicio a otro que ya existe y añadir test
         Exercise existing  = repository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, THE_EXERCISE_WITH_ID_D_DOES_NOT_EXIST.formatted(id)));
 
