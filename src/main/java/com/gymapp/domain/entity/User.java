@@ -23,8 +23,8 @@ public class User {
     Long id;
     String firstName;
     String lastName;
-    int height;
-    int weight;
+    Integer height;
+    Integer weight;
     LocalDate birthDate;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

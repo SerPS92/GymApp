@@ -12,18 +12,18 @@ import org.openapitools.jackson.nullable.JsonNullable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Schema(description = "Campos a actualizar parcialmente en un ejercicio (PATCH). Solo se aplican los presentes.")
+@Schema(description = "Fields to partially update an exercise (PATCH). Only present fields are applied.")
 public class ExerciseUpdateRequest {
 
-    @Schema(description = "Nombre del ejercicio", example = "Barbell Bench Press")
+    @Schema(description = "Exercise name.", example = "Barbell Bench Press")
     @Builder.Default
     private JsonNullable<String> name = JsonNullable.undefined();
 
-    @Schema(description = "Grupo muscular principal", example = "CHEST")
+    @Schema(description = "Primary muscle group.", example = "CHEST")
     @Builder.Default
     private JsonNullable<MuscleGroup> muscleGroup = JsonNullable.undefined();
 
-    @Schema(description = "Descripción del ejercicio", example = "Press de banca plano con barra.")
+    @Schema(description = "Exercise description.", example = "Flat barbell bench press.")
     @Builder.Default
     private JsonNullable<String> description = JsonNullable.undefined();
 }
