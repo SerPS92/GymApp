@@ -1,4 +1,4 @@
-package com.gymapp.api.dto.user.request;
+package com.gymapp.api.dto.client.request;
 
 
 import io.swagger.v3.oas.annotations.Parameter;
@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class UserFilterRequest {
+public class ClientFilterRequest {
 
     @Parameter(description = "Filter by first name (partial, case-insensitive).")
     @Size(max = 50)

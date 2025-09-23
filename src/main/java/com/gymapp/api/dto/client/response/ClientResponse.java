@@ -1,4 +1,4 @@
-package com.gymapp.api.dto.user.response;
+package com.gymapp.api.dto.client.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
@@ -7,17 +7,17 @@ import lombok.Value;
 import java.time.LocalDate;
 
 @Value
-@Schema(description = "Represents an user data. ")
+@Schema(description = "Represents an client data. ")
 @Builder
-public class UserResponse {
+public class ClientResponse {
 
-    @Schema(description = "Unique user ID.", example = "1")
+    @Schema(description = "Unique client ID.", example = "1")
     Long id;
 
-    @Schema(description = "User first name.", example = "Sergio")
+    @Schema(description = "Client first name.", example = "Sergio")
     String firstName;
 
-    @Schema(description = "User last name.", example = "Perez Garcia")
+    @Schema(description = "Client last name.", example = "Perez Garcia")
     String lastName;
 
     @Schema(description = "Height in centimeters.", example = "180")

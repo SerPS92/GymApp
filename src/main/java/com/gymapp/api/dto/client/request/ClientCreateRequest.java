@@ -1,4 +1,4 @@
-package com.gymapp.api.dto.user.request;
+package com.gymapp.api.dto.client.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
@@ -13,17 +13,17 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Data to create a new user.")
-public class UserCreateRequest {
+@Schema(description = "Data to create a new client.")
+public class ClientCreateRequest {
 
     @NotBlank(message = "firstName must not be blank")
     @Size(max = 60, message = "firstName must not exceed 60 characters")
-    @Schema(description = "User first name.", example = "Sergio")
+    @Schema(description = "Client first name.", example = "Sergio")
     private String firstName;
 
     @NotBlank(message = "lastName must not be blank")
     @Size(max = 60, message = "lastName must not exceed 60 characters")
-    @Schema(description = "User last name.", example = "Perez Garcia")
+    @Schema(description = "Client last name.", example = "Perez Garcia")
     private String lastName;
 
     @NotNull(message = "height must not be null")

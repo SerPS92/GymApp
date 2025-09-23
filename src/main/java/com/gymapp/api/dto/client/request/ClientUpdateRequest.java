@@ -1,4 +1,4 @@
-package com.gymapp.api.dto.user.request;
+package com.gymapp.api.dto.client.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -13,14 +13,14 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Schema(description = "Fields to partially update a user (PATCH). Only present fields are applied.")
-public class UserUpdateRequest {
+@Schema(description = "Fields to partially update a client (PATCH). Only present fields are applied.")
+public class ClientUpdateRequest {
 
-    @Schema(description = "User first name.", example = "Sergio")
+    @Schema(description = "Client first name.", example = "Sergio")
     @Builder.Default
     private JsonNullable<String> firstName = JsonNullable.undefined();
 
-    @Schema(description = "User last name.", example = "Perez Garcia")
+    @Schema(description = "Client last name.", example = "Perez Garcia")
     @Builder.Default
     private JsonNullable<String> lastName = JsonNullable.undefined();
 

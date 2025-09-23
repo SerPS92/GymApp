@@ -31,5 +31,5 @@ public class Program {
 
     @ManyToOne
     @JsonBackReference
-    User user;
+    Client client;
 }
