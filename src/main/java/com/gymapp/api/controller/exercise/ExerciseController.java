@@ -11,7 +11,6 @@ import com.gymapp.shared.error.BadRequestException;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,8 +24,7 @@ public class ExerciseController implements ExerciseApi{
 
     @Override
     public ResponseEntity<PageResponseDTO<ExerciseResponse>> getExercises(
-            @Valid ExerciseFilterRequest filter, int page, int size) throws BadRequestException {
-        Pageable pageable = PageRequest.of(page, size);
+            @Valid ExerciseFilterRequest filter, Pageable pageable) throws BadRequestException {
         PageResponseDTO<ExerciseResponse> responseDTO = exerciseService.search(filter, pageable);
         log.info("Content size: {}", responseDTO.getContent().size());
         return ResponseEntity.ok(responseDTO);
