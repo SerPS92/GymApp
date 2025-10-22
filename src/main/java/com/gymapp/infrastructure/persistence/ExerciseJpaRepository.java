@@ -7,6 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface ExerciseJpaRepository extends JpaRepository<Exercise, Long> {
 
@@ -15,4 +17,5 @@ public interface ExerciseJpaRepository extends JpaRepository<Exercise, Long> {
 
     Page<Exercise> findByNameContainingIgnoreCase(String name, Pageable pageable);
     Page<Exercise> findByMuscleGroup(MuscleGroup muscleGroup, Pageable pageable);
+    Optional<Exercise> findByName(String name);
 }

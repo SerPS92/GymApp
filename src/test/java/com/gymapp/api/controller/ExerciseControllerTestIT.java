@@ -2,19 +2,21 @@ package com.gymapp.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gymapp.GymappApplication;
+import com.gymapp.api.dto.exercise.request.ExerciseCreateRequest;
+import com.gymapp.api.dto.exercise.request.ExerciseUpdateRequest;
 import com.gymapp.api.dto.exercise.response.ExerciseResponse;
 import com.gymapp.domain.entity.Exercise;
 import com.gymapp.domain.enums.MuscleGroup;
 import com.gymapp.infrastructure.persistence.ExerciseJpaRepository;
 import com.gymapp.shared.JsonTestUtils;
 import com.gymapp.shared.dto.PageResponseDTO;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,13 +25,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 @SpringBootTest(classes = GymappApplication.class)
@@ -46,18 +47,10 @@ class ExerciseControllerTestIT {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private final List<Long> insertedIds = new ArrayList<>();
-
     @BeforeEach
     void setUp(){
+        jpaRepository.deleteAll();
         insertTestData();
-    }
-
-    @AfterEach
-    void cleanUp(){
-        if(!insertedIds.isEmpty()){
-            jpaRepository.deleteAllById(insertedIds);
-        }
     }
 
     @ParameterizedTest
@@ -122,7 +115,224 @@ class ExerciseControllerTestIT {
                 .andExpect(jsonPath("$.detail").exists());
     }
 
+    @Test
+    @DisplayName("Should return the exercise correctly when querying by a valid ID")
+    void shouldReturnExerciseByIdSuccessfully() throws Exception {
 
+        Long benchPressTestId = findIdByName();
+
+        ExerciseResponse expectedResponse = ExerciseResponse.builder()
+                .id(benchPressTestId)
+                .name("Bench Press test")
+                .muscleGroup(MuscleGroup.CHEST)
+                .description("Classic chest exercise").build();
+
+        String expectedJson = objectMapper.writeValueAsString(expectedResponse);
+
+        MvcResult result = mockMvc.perform(get("/api/exercises/{exerciseId}", benchPressTestId)
+                .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andReturn();
+
+        String actualJson = result.getResponse().getContentAsString();
+
+        assertEquals(expectedJson, actualJson);
+    }
+
+    @Test
+    @DisplayName("Should return 404 Not Found when the exercise does not exist")
+    void shouldReturnNotFoundWhenExerciseDoesNotExist() throws Exception {
+        Long nonExistentId = 9999L;
+
+        mockMvc.perform(get("/api/exercises/{exerciseId}", nonExistentId))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Should create a new exercise successfully and return 201 Created")
+    void shouldCreateExerciseSuccessfully() throws Exception {
+
+        ExerciseCreateRequest request = ExerciseCreateRequest.builder()
+                .name("testName")
+                .muscleGroup(MuscleGroup.CHEST)
+                .description("testDescription")
+                .build();
+
+        MvcResult result = mockMvc.perform(post("/api/exercises")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+                )
+                .andExpect(header().exists("Location"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.name").value("testName"))
+                .andExpect(jsonPath("$.muscleGroup").value("CHEST"))
+                .andExpect(jsonPath("$.description").value("testDescription"))
+                .andReturn();
+
+        String responseJson = result.getResponse().getContentAsString();
+        ExerciseResponse response = objectMapper.readValue(responseJson, ExerciseResponse.class);
+
+        assertTrue(jpaRepository.existsById(response.getId()));
+    }
+
+    @Test
+    @DisplayName("Should return 400 Bad Request when name is null")
+    void shouldReturnBadRequestWhenNameIsNull() throws Exception {
+        ExerciseCreateRequest invalid = ExerciseCreateRequest.builder()
+                .name(null)
+                .muscleGroup(MuscleGroup.CHEST)
+                .description("desc")
+                .build();
+
+        mockMvc.perform(post("/api/exercises")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalid)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.errors[0].field").value("name"));
+    }
+
+    @Test
+    @DisplayName("Should return 400 when request body is malformed")
+    void shouldReturnBadRequestWhenJsonMalformed() throws Exception {
+        String malformedJson = "{ \"name\": \"Bench Press\", ";
+
+        mockMvc.perform(post("/api/exercises")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(malformedJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.title").value("Invalid request body"));
+    }
+
+    @Test
+    @DisplayName("Should return 400 when muscleGroup has an invalid enum value")
+    void shouldReturnBadRequestWhenEnumInvalid() throws Exception {
+        String invalidEnumJson = """
+            {
+                "name": "Press",
+                "muscleGroup": "CHEZT",
+                "description": "desc"
+            }
+            """;
+
+        mockMvc.perform(post("/api/exercises")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidEnumJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Invalid enum value"));
+    }
+
+    @Test
+    @DisplayName("Should update exercise fields successfully when valid data is provided")
+    void shouldUpdateExerciseSuccessfully() throws Exception {
+
+        ExerciseUpdateRequest request = ExerciseUpdateRequest.builder()
+                .name(JsonNullable.of("updatedName"))
+                .description(JsonNullable.of("updatedDescription"))
+                .build();
+
+        Long idToUpdate = jpaRepository.findByName("Bench Press test").get().getId();
+
+        mockMvc.perform(patch("/api/exercises/{id}", idToUpdate)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(idToUpdate))
+                .andExpect(jsonPath("$.name").value("updatedName"))
+                .andExpect(jsonPath("$.description").value("updatedDescription"))
+                .andExpect(jsonPath("$.muscleGroup").value(MuscleGroup.CHEST.name()));
+    }
+
+    @Test
+    @DisplayName("Should not update any field when request body is empty")
+    void shouldNotUpdateAnythingWhenEmptyRequest() throws Exception {
+
+        Long idToUpdate = findIdByName();
+
+        ExerciseUpdateRequest request = ExerciseUpdateRequest.builder().build();
+
+        mockMvc.perform(patch("/api/exercises/{id}", idToUpdate)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(idToUpdate))
+                .andExpect(jsonPath("$.name").value("Bench Press test"))
+                .andExpect(jsonPath("$.description").value("Classic chest exercise"))
+                .andExpect(jsonPath("$.muscleGroup").value(MuscleGroup.CHEST.name()));
+    }
+
+    @Test
+    @DisplayName("Should return 404 Not Found when trying to update a non-existent exercise")
+    void shouldReturnNotFoundWhenIdDoesNotExist() throws Exception {
+
+        Long nonExistentId = 1000L;
+
+        ExerciseUpdateRequest request = ExerciseUpdateRequest.builder().build();
+
+        mockMvc.perform(patch("/api/exercises/{id}", nonExistentId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        )
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.detail").value(String.format("The exercise with id %d does not exist",
+                        nonExistentId)));
+    }
+
+    @Test
+    @DisplayName("Should return 409 Conflict when updating exercise with an existing name and muscle group")
+    void shouldReturnConflictWhenUpdatingExerciseWithExistingNameAndMuscleGroup() throws Exception {
+
+        Long existingId = findIdByName();
+        String duplicateName = "Squat test";
+
+        ExerciseUpdateRequest updateRequest = ExerciseUpdateRequest.builder()
+                .name(JsonNullable.of(duplicateName))
+                .muscleGroup(JsonNullable.of(MuscleGroup.LEGS))
+                .build();
+
+        mockMvc.perform(
+                        patch("/api/exercises/{id}", existingId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(updateRequest))
+                )
+                .andExpect(status().isConflict())
+                .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.detail").value("The exercise already exists"));
+    }
+
+
+    @Test
+    @DisplayName("Should delete exercise successfully when ID exists")
+    void shouldDeleteExerciseSuccessfully() throws Exception {
+
+        Long idToDelete = findIdByName();
+
+        mockMvc.perform(delete("/api/exercises/{id}", idToDelete))
+                .andExpect(status().isNoContent());
+
+        assertFalse(jpaRepository.existsById(idToDelete));
+    }
+
+
+    @Test
+    @DisplayName("Should return 404 Not Found when trying to delete a non-existent exercise")
+    void shouldReturnNotFoundWhenDeletingNonExistingId() throws Exception {
+
+        Long nonExistentId = 1000L;
+
+        mockMvc.perform(delete("/api/exercises/{id}", nonExistentId))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.detail").value(String.format("The exercise with id %d does not exist",
+                        nonExistentId)));
+    }
 
     private static Stream<Arguments> provideExercisePaginationCases() {
         List<ExerciseResponse> all = List.of(
@@ -180,13 +390,14 @@ class ExerciseControllerTestIT {
         );
 
         jpaRepository.saveAll(entities);
-
-        insertedIds.clear();
-        for (Exercise e : entities){
-            insertedIds.add(e.getId());
-        }
-
     }
+
+    private Long findIdByName() {
+        return jpaRepository.findByName("Bench Press test")
+                .map(Exercise::getId)
+                .orElseThrow(() -> new IllegalStateException("Bench Press test not found in test data"));
+    }
+
 
 
 }
