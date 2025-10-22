@@ -11,8 +11,7 @@ spring:
       path: /h2-console
   sql:
     init:
-      mode: always
-      platform: h2
+      mode: never
 
   jpa:
     defer-datasource-initialization: true

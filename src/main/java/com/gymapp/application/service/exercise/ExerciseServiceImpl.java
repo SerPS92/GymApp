@@ -98,8 +98,7 @@ public class ExerciseServiceImpl implements ExerciseService{
         MuscleGroup targetMuscleGroup = pickValue(existing.getMuscleGroup(), request.getMuscleGroup());
         String targetDescription = pickText(existing.getDescription(), request.getDescription());
 
-        boolean unchanged =
-                targetName.equals(existing.getName()) &&
+        boolean unchanged = targetName.equals(existing.getName()) &&
                         targetMuscleGroup == existing.getMuscleGroup() &&
                         java.util.Objects.equals(targetDescription, existing.getDescription());
 

@@ -21,6 +21,7 @@ public class ProgramExercise {
     int reps;
     int sets;
     int restTime;
+    @Column(name = "workout_day")
     String day;
     String notes;
 

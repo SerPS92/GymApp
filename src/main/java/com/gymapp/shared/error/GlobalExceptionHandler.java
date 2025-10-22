@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -25,14 +26,17 @@ import static com.gymapp.shared.error.GlobalExceptionHandlerConstants.*;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(AppException.class)
-    public ProblemDetail handleAppException(AppException ex, HttpServletRequest req) {
+    public ResponseEntity<ProblemDetail> handleAppException(AppException ex, HttpServletRequest req) {
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(ex.getStatus(), ex.getMessage());
         pd.setTitle(ex.getStatus().getReasonPhrase());
         pd.setProperty(CODE, ex.getCode().name());
         pd.setProperty(PATH, req.getRequestURI());
         pd.setType(URI.create(URN_PROBLEM + ex.getCode().name().toLowerCase()));
         pd.setInstance(URI.create(req.getRequestURI()));
-        return pd;
+        return ResponseEntity
+                .status(ex.getStatus())
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .body(pd);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -156,7 +160,10 @@ public class GlobalExceptionHandler {
         pd.setInstance(java.net.URI.create(request.getRequestURI()));
         pd.setProperty(PATH, request.getRequestURI());
         pd.setProperty(CODE, (http == HttpStatus.NOT_FOUND ? NOT_FOUND : ERROR));
-        return ResponseEntity.status(status).body(pd);
+        return ResponseEntity
+                .status(status)
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .body(pd);
     }
 
     @ExceptionHandler(ConflictException.class)
@@ -171,7 +178,10 @@ public class GlobalExceptionHandler {
         pd.setInstance(java.net.URI.create(request.getRequestURI()));
         pd.setProperty(PATH, request.getRequestURI());
         pd.setProperty(CODE, HttpStatus.CONFLICT.name());
-        return ResponseEntity.status(org.springframework.http.HttpStatus.CONFLICT).body(pd);
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .body(pd);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
@@ -186,7 +196,10 @@ public class GlobalExceptionHandler {
         pd.setInstance(java.net.URI.create(request.getRequestURI()));
         pd.setProperty(PATH, request.getRequestURI());
         pd.setProperty(CODE, HttpStatus.CONFLICT.name());
-        return ResponseEntity.status(org.springframework.http.HttpStatus.CONFLICT).body(pd);
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .body(pd);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -211,7 +224,10 @@ public class GlobalExceptionHandler {
             pd.setInstance(java.net.URI.create(request.getRequestURI()));
             pd.setProperty(PATH, request.getRequestURI());
             pd.setProperty(CODE, HttpStatus.BAD_REQUEST.name());
-            return ResponseEntity.badRequest().body(pd);
+            return ResponseEntity
+                    .badRequest()
+                    .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                    .body(pd);
         }
 
         ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
