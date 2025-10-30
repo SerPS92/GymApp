@@ -15,7 +15,7 @@ public final class GlobalExceptionHandlerConstants {
     public static final String VALIDATION_FAILED = "Validation failed";
     public static final String INVALID_VALUE_FOR_PARAMETER = "Invalid value for parameter";
     public static final String INVALID_REQUEST_PARAMETERS = "Invalid request parameters";
-    public static final String DATA_INTEGRITY_VIOLATION = "Data integrity violation.";
+    public static final String DATA_INTEGRITY_VIOLATION = "Data integrity violation";
     public static final String UNEXPECTED_ERROR = "Unexpected error";
     public static final String CONFLICT = "CONFLICT";
     public static final String CODE = "code";
@@ -26,7 +26,7 @@ public final class GlobalExceptionHandlerConstants {
     public static final String REJECTED_VALUE = "rejectedValue";
     public static final String ERRORS = "errors";
     public static final String ERROR = "Error";
-    public static final String NOT_FOUND = "not_found";
+    public static final String NOT_FOUND = "NOT_FOUND";
     public static final String INVALID_ENUM_VALUE = "Invalid enum value";
     public static final String INVALID_VALUE_FOR_AN_ENUM_ALLOWED_VALUES = "Invalid value for an enum. Allowed values: ";
     public static final String DELIMITER = ", ";

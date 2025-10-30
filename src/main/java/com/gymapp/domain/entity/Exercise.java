@@ -28,4 +28,6 @@ public class Exercise {
     //TODO imagen
     @Column(length = 1000)
     String description;
+    
+    //TODO creatorId
 }
