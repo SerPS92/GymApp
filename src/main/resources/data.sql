@@ -48,3 +48,18 @@ INSERT INTO exercises (name, muscle_group, description) VALUES
 
   ('Jump Rope', 'CARDIO', 'Steady jump rope cardio.'),
   ('Rowing Machine', 'CARDIO', 'Cardio on indoor rower.');
+
+
+INSERT INTO categories (name) VALUES
+('Chest'),
+('Back'),
+('Legs'),
+('Shoulders'),
+('Arms'),
+('Core'),
+('Cardio'),
+('Full Body'),
+('Home Workout'),
+('Stretching'),
+('Mobility'),
+('HIIT');
