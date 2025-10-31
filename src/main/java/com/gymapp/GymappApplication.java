@@ -10,6 +10,6 @@ public class GymappApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(GymappApplication.class, args);
 		System.out.println("Versión de Spring: " + SpringVersion.getVersion());
+		System.out.println("swagger-ui: " + "http://localhost:8080/swagger-ui.html");
 	}
-
 }
