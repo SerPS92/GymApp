@@ -5,8 +5,10 @@ import com.gymapp.api.dto.exercise.request.ExerciseFilterRequest;
 import com.gymapp.api.dto.exercise.request.ExerciseUpdateRequest;
 import com.gymapp.api.dto.exercise.response.ExerciseResponse;
 import com.gymapp.application.mapper.exercise.ExerciseMapper;
+import com.gymapp.domain.entity.Category;
 import com.gymapp.domain.entity.Exercise;
-import com.gymapp.domain.enums.MuscleGroup;
+import com.gymapp.domain.enums.Difficulty;
+import com.gymapp.infrastructure.persistence.CategoryJpaRepository;
 import com.gymapp.infrastructure.persistence.ExerciseJpaRepository;
 import com.gymapp.shared.dto.PageResponseDTO;
 import com.gymapp.shared.error.AppException;
@@ -23,7 +25,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.gymapp.shared.error.ErrorConstants.*;
 
@@ -31,27 +35,38 @@ import static com.gymapp.shared.error.ErrorConstants.*;
 @RequiredArgsConstructor
 public class ExerciseServiceImpl implements ExerciseService{
 
-    private final ExerciseJpaRepository repository;
+
+    private final ExerciseJpaRepository exerciseRepository;
+    private final CategoryJpaRepository categoryRepository;
     private final ExerciseMapper exerciseMapper;
 
     @Override
     public PageResponseDTO<ExerciseResponse> search(ExerciseFilterRequest filterRequest, Pageable pageable) throws BadRequestException {
 
-        boolean hasName  = StringUtils.hasText(filterRequest.getName());
-        boolean hasGroup = filterRequest.getMuscleGroup() != null;
+        boolean hasName = StringUtils.hasText(filterRequest.getName());
+        boolean hasCategories = filterRequest.getCategoryIds() != null && !filterRequest.getCategoryIds().isEmpty();
+        boolean hasDifficulty = filterRequest.getDifficulty() != null;
 
-        if (hasName && hasGroup) {
-            throw new BadRequestException(SEND_EXACTLY_ONE_FILTER_NAME_OR_MUSCLE_GROUP);
+        if (hasName && (hasCategories || hasDifficulty)) {
+            throw new BadRequestException(CANNOT_COMBINE_NAME_WITH_OTHER_FILTERS);
         }
 
         Page<Exercise> page;
-        if (!hasName && !hasGroup) {
-            page = repository.findAll(pageable);
-        } else if (hasName) {
-            String name = filterRequest.getName().trim();
-            page = repository.findByNameContainingIgnoreCase(name, pageable);
-        } else {
-            page = repository.findByMuscleGroup(filterRequest.getMuscleGroup(), pageable);
+
+        if (hasName) {
+            page = exerciseRepository.findByNameContainingIgnoreCase(filterRequest.getName().trim(), pageable);
+        }
+        else if (hasCategories && hasDifficulty) {
+            page = exerciseRepository.findByCategoryIdsAndDifficulty(filterRequest.getCategoryIds(), filterRequest.getDifficulty(), pageable);
+        }
+        else if (hasCategories) {
+            page = exerciseRepository.findByCategoryIds(filterRequest.getCategoryIds(), pageable);
+        }
+        else if (hasDifficulty) {
+            page = exerciseRepository.findByDifficulty(filterRequest.getDifficulty(), pageable);
+        }
+        else {
+            page = exerciseRepository.findAll(pageable);
         }
 
         List<ExerciseResponse> content = page.map(exerciseMapper::toResponse).getContent();
@@ -72,7 +87,7 @@ public class ExerciseServiceImpl implements ExerciseService{
 
     @Override
     public ExerciseResponse getById(Long id) {
-        Exercise response = repository.findById(id).orElseThrow(()->
+        Exercise response = exerciseRepository.findById(id).orElseThrow(()->
                 new AppException(HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND, THE_EXERCISE_WITH_ID_D_DOES_NOT_EXIST.formatted(id)));
 
         return exerciseMapper.toResponse(response);
@@ -80,51 +95,78 @@ public class ExerciseServiceImpl implements ExerciseService{
 
     @Override
     public ExerciseResponse createExercise(ExerciseCreateRequest request) {
-        if(repository.existsByNameIgnoreCaseAndMuscleGroup(request.getName().trim(), request.getMuscleGroup())){
+        String name = request.getName().trim();
+
+        if (exerciseRepository.existsByNameIgnoreCase(name)) {
             throw new ConflictException(THE_EXERCISE_ALREADY_EXISTS);
         }
+
+        List<Category> categories = categoryRepository.findAllById(request.getCategoryIds());
+        if (categories.isEmpty()) {
+            throw new BadRequestException("At least one valid categoryId must be provided");
+        }
+
         Exercise exercise = exerciseMapper.toEntity(request);
-        Exercise saved = repository.save(exercise);
+        exercise.setCategories(new HashSet<>(categories));
+
+        Exercise saved = exerciseRepository.save(exercise);
+
         return exerciseMapper.toResponse(saved);
     }
 
     @Override
     public ExerciseResponse updateExercise(Long id, ExerciseUpdateRequest request) {
 
-        Exercise existing  = repository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, THE_EXERCISE_WITH_ID_D_DOES_NOT_EXIST.formatted(id)));
+        Exercise existing = exerciseRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        THE_EXERCISE_WITH_ID_D_DOES_NOT_EXIST.formatted(id)
+                ));
 
         String targetName = pickText(existing.getName(), request.getName());
-        MuscleGroup targetMuscleGroup = pickValue(existing.getMuscleGroup(), request.getMuscleGroup());
+        Difficulty targetDifficulty = pickValue(existing.getDifficulty(), request.getDifficulty());
         String targetDescription = pickText(existing.getDescription(), request.getDescription());
 
-        boolean unchanged = targetName.equals(existing.getName()) &&
-                        targetMuscleGroup == existing.getMuscleGroup() &&
-                        java.util.Objects.equals(targetDescription, existing.getDescription());
+        Set<Category> targetCategories = existing.getCategories();
+
+        if (request.getCategoryIds().isPresent()) {
+            List<Category> categories = categoryRepository.findAllById(request.getCategoryIds().get());
+            if (categories.isEmpty()) {
+                throw new BadRequestException("At least one valid categoryId must be provided");
+            }
+            targetCategories = new HashSet<>(categories);
+        }
+
+        boolean unchanged =
+                targetName.equals(existing.getName()) &&
+                        targetDifficulty == existing.getDifficulty() &&
+                        java.util.Objects.equals(targetDescription, existing.getDescription()) &&
+                        targetCategories.equals(existing.getCategories());
 
         if (unchanged) {
             return exerciseMapper.toResponse(existing);
         }
 
-        if (repository.existsByNameIgnoreCaseAndMuscleGroupAndIdNot(targetName, targetMuscleGroup, id)) {
+        if (exerciseRepository.existsByNameIgnoreCaseAndIdNot(targetName, id)) {
             throw new ConflictException(THE_EXERCISE_ALREADY_EXISTS);
         }
 
         existing.setName(targetName);
-        existing.setMuscleGroup(targetMuscleGroup);
+        existing.setDifficulty(targetDifficulty);
         existing.setDescription(targetDescription);
+        existing.setCategories(targetCategories);
 
-        Exercise saved = repository.save(existing);
+        Exercise saved = exerciseRepository.save(existing);
         return exerciseMapper.toResponse(saved);
     }
 
     @Override
     public void deleteExercise(Long id) {
-        if (!repository.existsById(id)) {
+        if (!exerciseRepository.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND ,THE_EXERCISE_WITH_ID_D_DOES_NOT_EXIST.formatted(id));
         }
         try {
-            repository.deleteById(id);
+            exerciseRepository.deleteById(id);
         } catch (DataIntegrityViolationException ex) {
             throw new ConflictException(CANNOT_DELETE_THE_EXERCISE_IS_REFERENCED, ex);
         }

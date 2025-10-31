@@ -1,9 +1,12 @@
 package com.gymapp.api.dto.exercise.response;
 
-import com.gymapp.domain.enums.MuscleGroup;
+import com.gymapp.api.dto.category.response.CategoryResponse;
+import com.gymapp.domain.enums.Difficulty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Value;
+
+import java.util.List;
 
 @Value
 @Builder
@@ -16,9 +19,12 @@ public class ExerciseResponse {
     @Schema(description = "Exercise name.", example = "Bench Press")
     String name;
 
-    @Schema(description = "Primary muscle group.", example = "CHEST")
-    MuscleGroup muscleGroup;
+    @Schema(description = "Difficulty level of the exercise.", example = "BEGINNER")
+    Difficulty difficulty;
 
     @Schema(description = "Exercise description.", example = "Flat barbell bench press focusing on pectorals.")
     String description;
+
+    @Schema(description = "List of associated categories.")
+    List<CategoryResponse> categories;
 }

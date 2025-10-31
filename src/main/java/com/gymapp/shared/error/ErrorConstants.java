@@ -12,5 +12,5 @@ public class ErrorConstants {
     public static final String CANNOT_DELETE_THE_CATEGORY_IS_REFERENCED = "Cannot delete: the category is referenced.";
     public static final String THE_EXERCISE_ALREADY_EXISTS = "The exercise already exists";
     public static final String THE_CATEGORY_ALREADY_EXISTS = "The category already exists";
-    public static final String SEND_EXACTLY_ONE_FILTER_NAME_OR_MUSCLE_GROUP = "Send exactly one filter: name OR muscleGroup.";
+    public static final String CANNOT_COMBINE_NAME_WITH_OTHER_FILTERS = "Cannot combine 'name' with other filters";
 }

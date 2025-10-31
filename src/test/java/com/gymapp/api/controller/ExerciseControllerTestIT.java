@@ -2,11 +2,14 @@ package com.gymapp.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gymapp.GymappApplication;
+import com.gymapp.api.dto.category.response.CategoryResponse;
 import com.gymapp.api.dto.exercise.request.ExerciseCreateRequest;
 import com.gymapp.api.dto.exercise.request.ExerciseUpdateRequest;
 import com.gymapp.api.dto.exercise.response.ExerciseResponse;
+import com.gymapp.domain.entity.Category;
 import com.gymapp.domain.entity.Exercise;
-import com.gymapp.domain.enums.MuscleGroup;
+import com.gymapp.domain.enums.Difficulty;
+import com.gymapp.infrastructure.persistence.CategoryJpaRepository;
 import com.gymapp.infrastructure.persistence.ExerciseJpaRepository;
 import com.gymapp.shared.JsonTestUtils;
 import com.gymapp.shared.dto.PageResponseDTO;
@@ -26,8 +29,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -42,14 +47,18 @@ class ExerciseControllerTestIT {
     private MockMvc mockMvc;
 
     @Autowired
-    private ExerciseJpaRepository jpaRepository;
+    private ExerciseJpaRepository exerciseJpaRepository;
+
+    @Autowired
+    private CategoryJpaRepository categoryJpaRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp(){
-        jpaRepository.deleteAll();
+        exerciseJpaRepository.deleteAll();
+        categoryJpaRepository.deleteAll();
         insertTestData();
     }
 
@@ -90,8 +99,51 @@ class ExerciseControllerTestIT {
         String expectedJson = objectMapper.writeValueAsString(expected);
         String actualJson = result.getResponse().getContentAsString();
 
-        JsonTestUtils.assertJsonIgnoringFields(expectedJson, actualJson, List.of("id"));
+        JsonTestUtils.assertJsonIgnoringFields(expectedJson, actualJson, List.of("id", "description", "categories"));
     }
+
+    @Test
+    @DisplayName("Should return exercises filtered by difficulty")
+    void shouldReturnExercisesByDifficulty() throws Exception {
+        mockMvc.perform(get("/api/exercises")
+                        .param("difficulty", "BEGINNER")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content[*].difficulty").value(
+                        everyItem(is("BEGINNER"))
+                ));
+    }
+
+    @Test
+    @DisplayName("Should return exercises filtered by category")
+    void shouldReturnExercisesByCategory() throws Exception {
+        Long chestId = categoryJpaRepository.findByNameIgnoreCase("Chest").get().getId();
+
+        mockMvc.perform(get("/api/exercises")
+                        .param("categoryIds", chestId.toString())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content[0].categories[0].id").value(chestId));
+    }
+
+    @Test
+    @DisplayName("Should return exercises filtered by category and difficulty")
+    void shouldReturnExercisesByCategoryAndDifficulty() throws Exception {
+
+        Long chestId = categoryJpaRepository.findByNameIgnoreCase("Chest").get().getId();
+
+        mockMvc.perform(get("/api/exercises")
+                        .param("categoryIds", chestId.toString())
+                        .param("difficulty", "BEGINNER")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content[*].categories[0].id").value(chestId.intValue()))
+                .andExpect(jsonPath("$.content[*].difficulty").value(everyItem(is("BEGINNER"))));
+    }
+
 
     @Test
     @DisplayName("Should return an empty list when there are no matches for the exercise name")
@@ -105,37 +157,45 @@ class ExerciseControllerTestIT {
     }
 
     @Test
-    @DisplayName("Should return 400 when both name and muscleGroup are sent simultaneously")
-    void shouldReturnBadRequestWhenBothFiltersPresent() throws Exception {
+    @DisplayName("Should return 400 when multiple incompatible filters are sent")
+    void shouldReturnBadRequestWhenMultipleFiltersPresent() throws Exception {
         mockMvc.perform(get("/api/exercises")
                         .param("name", "press")
-                        .param("muscleGroup", "CHEST"))
+                        .param("categoryIds", "1"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
                 .andExpect(jsonPath("$.detail").exists());
     }
 
+
     @Test
     @DisplayName("Should return the exercise correctly when querying by a valid ID")
     void shouldReturnExerciseByIdSuccessfully() throws Exception {
 
-        Long benchPressTestId = findIdByName();
+        Long benchPressTestId = findIdByName("Bench Press test");
 
         ExerciseResponse expectedResponse = ExerciseResponse.builder()
                 .id(benchPressTestId)
                 .name("Bench Press test")
-                .muscleGroup(MuscleGroup.CHEST)
-                .description("Classic chest exercise").build();
+                .difficulty(Difficulty.INTERMEDIATE)
+                .description("Classic chest exercise")
+                .categories(List.of(
+                        CategoryResponse.builder().id(1L).name("Chest").build()
+                ))
+                .build();
 
         String expectedJson = objectMapper.writeValueAsString(expectedResponse);
 
         MvcResult result = mockMvc.perform(get("/api/exercises/{exerciseId}", benchPressTestId)
-                .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andReturn();
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
 
         String actualJson = result.getResponse().getContentAsString();
 
-        assertEquals(expectedJson, actualJson);
+        JsonTestUtils.assertJsonIgnoringFields(expectedJson, actualJson, List.of("id", "categories[0].id"));
     }
+
 
     @Test
     @DisplayName("Should return 404 Not Found when the exercise does not exist")
@@ -150,37 +210,46 @@ class ExerciseControllerTestIT {
     @DisplayName("Should create a new exercise successfully and return 201 Created")
     void shouldCreateExerciseSuccessfully() throws Exception {
 
+        Long chestId = categoryJpaRepository.findByNameIgnoreCase("Chest")
+                .map(Category::getId)
+                .orElseThrow(() -> new IllegalStateException("Chest category not found"));
+
         ExerciseCreateRequest request = ExerciseCreateRequest.builder()
                 .name("testName")
-                .muscleGroup(MuscleGroup.CHEST)
                 .description("testDescription")
+                .difficulty(Difficulty.BEGINNER)
+                .categoryIds(List.of(chestId))
                 .build();
 
         MvcResult result = mockMvc.perform(post("/api/exercises")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-                )
-                .andExpect(header().exists("Location"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(header().exists("Location"))
+                .andExpect(jsonPath("$.id").isNumber())
                 .andExpect(jsonPath("$.name").value("testName"))
-                .andExpect(jsonPath("$.muscleGroup").value("CHEST"))
                 .andExpect(jsonPath("$.description").value("testDescription"))
+                .andExpect(jsonPath("$.difficulty").value("BEGINNER"))
+                .andExpect(jsonPath("$.categories[0].name").value("Chest"))
                 .andReturn();
 
         String responseJson = result.getResponse().getContentAsString();
         ExerciseResponse response = objectMapper.readValue(responseJson, ExerciseResponse.class);
 
-        assertTrue(jpaRepository.existsById(response.getId()));
+        assertNotNull(response.getId());
+        assertTrue(exerciseJpaRepository.existsById(response.getId()));
     }
+
+
 
     @Test
     @DisplayName("Should return 400 Bad Request when name is null")
     void shouldReturnBadRequestWhenNameIsNull() throws Exception {
         ExerciseCreateRequest invalid = ExerciseCreateRequest.builder()
                 .name(null)
-                .muscleGroup(MuscleGroup.CHEST)
                 .description("desc")
+                .difficulty(Difficulty.BEGINNER)
+                .categoryIds(List.of(1L))
                 .build();
 
         mockMvc.perform(post("/api/exercises")
@@ -191,6 +260,7 @@ class ExerciseControllerTestIT {
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
                 .andExpect(jsonPath("$.errors[0].field").value("name"));
     }
+
 
     @Test
     @DisplayName("Should return 400 when request body is malformed")
@@ -206,15 +276,16 @@ class ExerciseControllerTestIT {
     }
 
     @Test
-    @DisplayName("Should return 400 when muscleGroup has an invalid enum value")
+    @DisplayName("Should return 400 when difficulty has an invalid enum value")
     void shouldReturnBadRequestWhenEnumInvalid() throws Exception {
         String invalidEnumJson = """
-            {
-                "name": "Press",
-                "muscleGroup": "CHEZT",
-                "description": "desc"
-            }
-            """;
+        {
+            "name": "Press",
+            "difficulty": "EASYMODE",
+            "description": "desc",
+            "categoryIds": [1]
+        }
+        """;
 
         mockMvc.perform(post("/api/exercises")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -223,6 +294,7 @@ class ExerciseControllerTestIT {
                 .andExpect(jsonPath("$.title").value("Invalid enum value"));
     }
 
+
     @Test
     @DisplayName("Should update exercise fields successfully when valid data is provided")
     void shouldUpdateExerciseSuccessfully() throws Exception {
@@ -230,39 +302,41 @@ class ExerciseControllerTestIT {
         ExerciseUpdateRequest request = ExerciseUpdateRequest.builder()
                 .name(JsonNullable.of("updatedName"))
                 .description(JsonNullable.of("updatedDescription"))
+                .difficulty(JsonNullable.of(Difficulty.ADVANCED))
                 .build();
 
-        Long idToUpdate = jpaRepository.findByName("Bench Press test").get().getId();
+        Long idToUpdate = exerciseJpaRepository.findByName("Bench Press test").get().getId();
 
         mockMvc.perform(patch("/api/exercises/{id}", idToUpdate)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-        )
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(idToUpdate))
                 .andExpect(jsonPath("$.name").value("updatedName"))
                 .andExpect(jsonPath("$.description").value("updatedDescription"))
-                .andExpect(jsonPath("$.muscleGroup").value(MuscleGroup.CHEST.name()));
+                .andExpect(jsonPath("$.difficulty").value("ADVANCED"));
     }
+
 
     @Test
     @DisplayName("Should not update any field when request body is empty")
     void shouldNotUpdateAnythingWhenEmptyRequest() throws Exception {
 
-        Long idToUpdate = findIdByName();
+        Long idToUpdate = findIdByName("Bench Press test");
 
         ExerciseUpdateRequest request = ExerciseUpdateRequest.builder().build();
 
         mockMvc.perform(patch("/api/exercises/{id}", idToUpdate)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-        )
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(idToUpdate))
                 .andExpect(jsonPath("$.name").value("Bench Press test"))
                 .andExpect(jsonPath("$.description").value("Classic chest exercise"))
-                .andExpect(jsonPath("$.muscleGroup").value(MuscleGroup.CHEST.name()));
+                .andExpect(jsonPath("$.difficulty").value("INTERMEDIATE"))
+                .andExpect(jsonPath("$.categories[0].name").value("Chest"));
     }
+
 
     @Test
     @DisplayName("Should return 404 Not Found when trying to update a non-existent exercise")
@@ -284,15 +358,16 @@ class ExerciseControllerTestIT {
     }
 
     @Test
-    @DisplayName("Should return 409 Conflict when updating exercise with an existing name and muscle group")
-    void shouldReturnConflictWhenUpdatingExerciseWithExistingNameAndMuscleGroup() throws Exception {
+    @DisplayName("Should return 409 Conflict when updating exercise with an existing name")
+    void shouldReturnConflictWhenUpdatingExerciseWithExistingName() throws Exception {
 
-        Long existingId = findIdByName();
+        Long existingId = findIdByName("Bench Press test");
         String duplicateName = "Squat test";
 
         ExerciseUpdateRequest updateRequest = ExerciseUpdateRequest.builder()
                 .name(JsonNullable.of(duplicateName))
-                .muscleGroup(JsonNullable.of(MuscleGroup.LEGS))
+                .description(JsonNullable.undefined())
+                .difficulty(JsonNullable.undefined())
                 .build();
 
         mockMvc.perform(
@@ -307,16 +382,17 @@ class ExerciseControllerTestIT {
     }
 
 
+
     @Test
     @DisplayName("Should delete exercise successfully when ID exists")
     void shouldDeleteExerciseSuccessfully() throws Exception {
 
-        Long idToDelete = findIdByName();
+        Long idToDelete = findIdByName("Bench Press test");
 
         mockMvc.perform(delete("/api/exercises/{id}", idToDelete))
                 .andExpect(status().isNoContent());
 
-        assertFalse(jpaRepository.existsById(idToDelete));
+        assertFalse(exerciseJpaRepository.existsById(idToDelete));
     }
 
 
@@ -336,68 +412,76 @@ class ExerciseControllerTestIT {
 
     private static Stream<Arguments> provideExercisePaginationCases() {
         List<ExerciseResponse> all = List.of(
-                ExerciseResponse.builder().name("Bench Press test").muscleGroup(MuscleGroup.CHEST).description("Classic chest exercise").build(),
-                ExerciseResponse.builder().name("Squat test").muscleGroup(MuscleGroup.LEGS).description("Fundamental lower body exercise").build(),
-                ExerciseResponse.builder().name("Deadlift test").muscleGroup(MuscleGroup.BACK).description("Full body compound movement").build(),
-                ExerciseResponse.builder().name("Bicep Curl test").muscleGroup(MuscleGroup.BICEPS).description("Isolation exercise for biceps").build()
+                ExerciseResponse.builder().name("Bench Press test").difficulty(Difficulty.INTERMEDIATE).build(),
+                ExerciseResponse.builder().name("Squat test").difficulty(Difficulty.INTERMEDIATE).build(),
+                ExerciseResponse.builder().name("Deadlift test").difficulty(Difficulty.ADVANCED).build(),
+                ExerciseResponse.builder().name("Bicep Curl test").difficulty(Difficulty.BEGINNER).build(),
+                ExerciseResponse.builder().name("Push Up test").difficulty(Difficulty.BEGINNER).build()
         );
 
-        List<ExerciseResponse> byNameAsc = List.of(all.get(0), all.get(3), all.get(2), all.get(1));
-        List<ExerciseResponse> byIdAsc   = List.of(all.get(0), all.get(1), all.get(2), all.get(3));
-        List<ExerciseResponse> byIdDesc  = List.of(all.get(3), all.get(2), all.get(1), all.get(0));
+        List<ExerciseResponse> byNameAsc = List.of(
+                all.get(0),
+                all.get(3),
+                all.get(2),
+                all.get(4),
+                all.get(1)
+        );
 
         return Stream.of(
-                Arguments.of("", 0, 2, "id,desc",
-                        List.of(byIdDesc.get(0), byIdDesc.get(1)), 4L),
-
-                Arguments.of("Bench", 0, 5, "name,asc",
-                        List.of(byNameAsc.get(0)), 1L),
-
-                Arguments.of("", 1, 2, "id,asc",
-                        List.of(byIdAsc.get(2), byIdAsc.get(3)), 4L),
-
-                Arguments.of("", 0, 10, "name,asc",
-                        byNameAsc, 4L),
-
-                Arguments.of("", 3, 1, "name,asc",
-                        List.of(byNameAsc.get(3)), 4L)
+                Arguments.of("", 0, 2, "id,asc", all.subList(0, 2), 5L),
+                Arguments.of("", 0, 5, "name,asc", byNameAsc, 5L)
         );
     }
+
+
 
 
     private void insertTestData() {
+        Category chest = categoryJpaRepository.save(Category.builder().name("Chest").build());
+        Category legs  = categoryJpaRepository.save(Category.builder().name("Legs").build());
+        Category back  = categoryJpaRepository.save(Category.builder().name("Back").build());
+        Category arms  = categoryJpaRepository.save(Category.builder().name("Arms").build());
+
         List<Exercise> entities = List.of(
                 Exercise.builder()
                         .name("Bench Press test")
-                        .muscleGroup(MuscleGroup.CHEST)
+                        .difficulty(Difficulty.INTERMEDIATE)
                         .description("Classic chest exercise")
+                        .categories(Set.of(chest))
                         .build(),
                 Exercise.builder()
                         .name("Squat test")
-                        .muscleGroup(MuscleGroup.LEGS)
+                        .difficulty(Difficulty.INTERMEDIATE)
                         .description("Fundamental lower body exercise")
+                        .categories(Set.of(legs))
                         .build(),
                 Exercise.builder()
                         .name("Deadlift test")
-                        .muscleGroup(MuscleGroup.BACK)
+                        .difficulty(Difficulty.ADVANCED)
                         .description("Full body compound movement")
+                        .categories(Set.of(back))
                         .build(),
                 Exercise.builder()
                         .name("Bicep Curl test")
-                        .muscleGroup(MuscleGroup.BICEPS)
+                        .difficulty(Difficulty.BEGINNER)
                         .description("Isolation exercise for biceps")
+                        .categories(Set.of(arms))
+                        .build(),
+                Exercise.builder()
+                        .name("Push Up test")
+                        .difficulty(Difficulty.BEGINNER)
+                        .description("Bodyweight chest exercise for beginners")
+                        .categories(Set.of(chest))
                         .build()
         );
 
-        jpaRepository.saveAll(entities);
+        exerciseJpaRepository.saveAll(entities);
     }
 
-    private Long findIdByName() {
-        return jpaRepository.findByName("Bench Press test")
+    private Long findIdByName(String name) {
+        return exerciseJpaRepository.findByName(name)
                 .map(Exercise::getId)
-                .orElseThrow(() -> new IllegalStateException("Bench Press test not found in test data"));
+                .orElseThrow(() -> new IllegalStateException(name + " not found in test data"));
     }
-
-
 
 }

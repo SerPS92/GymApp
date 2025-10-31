@@ -1,13 +1,16 @@
 package com.gymapp.application.service;
 
+import com.gymapp.api.dto.category.response.CategoryResponse;
 import com.gymapp.api.dto.exercise.request.ExerciseCreateRequest;
 import com.gymapp.api.dto.exercise.request.ExerciseFilterRequest;
 import com.gymapp.api.dto.exercise.request.ExerciseUpdateRequest;
 import com.gymapp.api.dto.exercise.response.ExerciseResponse;
 import com.gymapp.application.mapper.exercise.ExerciseMapper;
 import com.gymapp.application.service.exercise.ExerciseServiceImpl;
+import com.gymapp.domain.entity.Category;
 import com.gymapp.domain.entity.Exercise;
-import com.gymapp.domain.enums.MuscleGroup;
+import com.gymapp.domain.enums.Difficulty;
+import com.gymapp.infrastructure.persistence.CategoryJpaRepository;
 import com.gymapp.infrastructure.persistence.ExerciseJpaRepository;
 import com.gymapp.shared.dto.PageResponseDTO;
 import com.gymapp.shared.error.AppException;
@@ -30,6 +33,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static com.gymapp.shared.error.ErrorConstants.THE_EXERCISE_WITH_ID_D_DOES_NOT_EXIST;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,32 +52,63 @@ class ExerciseServiceTest {
     private ExerciseJpaRepository repository;
 
     @Mock
+    private CategoryJpaRepository categoryRepository;
+
+    @Mock
     private ExerciseMapper exerciseMapper;
 
 
     @Test
     @DisplayName("Filters by name and returns mapped page")
-    void searchByNameTest(){
+    void searchByNameTest() {
 
         Pageable pageable = PageRequest.of(0, 2);
         ExerciseFilterRequest filter = new ExerciseFilterRequest();
         filter.setName(" press ");
 
-        Exercise exercise1 = new Exercise();
-        exercise1.setId(1L);
-        exercise1.setName("Bench Press");
-        exercise1.setMuscleGroup(MuscleGroup.CHEST);
 
-        Exercise exercise2 = new Exercise();
-        exercise2.setId(2L);
-        exercise2.setName("Shoulder Press");
-        exercise2.setMuscleGroup(MuscleGroup.SHOULDERS);
+        Category chest = new Category(1L, "Chest");
+        Category shoulders = new Category(2L, "Shoulders");
+
+        Exercise exercise1 = Exercise.builder()
+                .id(1L)
+                .name("Bench Press")
+                .difficulty(Difficulty.INTERMEDIATE)
+                .description("desc1")
+                .categories(Set.of(chest))
+                .build();
+
+        Exercise exercise2 = Exercise.builder()
+                .id(2L)
+                .name("Shoulder Press")
+                .difficulty(Difficulty.ADVANCED)
+                .description("desc2")
+                .categories(Set.of(shoulders))
+                .build();
 
         Page<Exercise> page = new PageImpl<>(List.of(exercise1, exercise2), pageable, 2);
         when(repository.findByNameContainingIgnoreCase("press", pageable)).thenReturn(page);
 
-        ExerciseResponse response1 = ExerciseResponse.builder().id(1L).name(exercise1.getName()).muscleGroup(exercise1.getMuscleGroup()).build();
-        ExerciseResponse response2 = ExerciseResponse.builder().id(2L).name(exercise2.getName()).muscleGroup(exercise2.getMuscleGroup()).build();
+        ExerciseResponse response1 = ExerciseResponse.builder()
+                .id(1L)
+                .name("Bench Press")
+                .difficulty(Difficulty.INTERMEDIATE)
+                .description("desc1")
+                .categories(List.of(
+                        CategoryResponse.builder().id(1L).name("Chest").build()
+                ))
+                .build();
+
+        ExerciseResponse response2 = ExerciseResponse.builder()
+                .id(2L)
+                .name("Shoulder Press")
+                .difficulty(Difficulty.ADVANCED)
+                .description("desc2")
+                .categories(List.of(
+                        CategoryResponse.builder().id(2L).name("Shoulders").build()
+                ))
+                .build();
+
         when(exerciseMapper.toResponse(exercise1)).thenReturn(response1);
         when(exerciseMapper.toResponse(exercise2)).thenReturn(response2);
 
@@ -83,23 +118,44 @@ class ExerciseServiceTest {
         assertThat(result.getTotalElements()).isEqualTo(2);
         assertThat(result.getPage()).isZero();
         assertThat(result.getSize()).isEqualTo(2);
+
+        ExerciseResponse first = result.getContent().get(0);
+        assertThat(first.getName()).isEqualTo("Bench Press");
+        assertThat(first.getDifficulty()).isEqualTo(Difficulty.INTERMEDIATE);
+        assertThat(first.getCategories()).hasSize(1);
+        assertThat(first.getCategories().get(0).getName()).isEqualTo("Chest");
     }
 
+
     @Test
-    @DisplayName("Filters by muscleGroup and returns mapped page")
-    void searchByMuscleGroupTest(){
+    @DisplayName("Filters by category and returns mapped page")
+    void searchByCategoryTest() {
+
         Pageable pageable = PageRequest.of(0, 2);
         ExerciseFilterRequest filter = new ExerciseFilterRequest();
-        filter.setMuscleGroup(MuscleGroup.CHEST);
+        filter.setCategoryIds(List.of(1L));
 
-        Exercise exercise1 = new Exercise();
-        exercise1.setId(1L);
-        exercise1.setName("Bench Press");
-        exercise1.setMuscleGroup(MuscleGroup.CHEST);
+        Category chest = new Category(1L, "Chest");
+
+        Exercise exercise1 = Exercise.builder()
+                .id(1L)
+                .name("Bench Press")
+                .difficulty(Difficulty.INTERMEDIATE)
+                .description("Flat bench press")
+                .categories(Set.of(chest))
+                .build();
 
         Page<Exercise> page = new PageImpl<>(List.of(exercise1), pageable, 1);
-        when(repository.findByMuscleGroup(MuscleGroup.CHEST, pageable)).thenReturn(page);
-        ExerciseResponse response = ExerciseResponse.builder().id(1L).name(exercise1.getName()).muscleGroup(exercise1.getMuscleGroup()).build();
+        when(repository.findByCategoryIds(List.of(1L), pageable)).thenReturn(page);
+
+        ExerciseResponse response = ExerciseResponse.builder()
+                .id(1L)
+                .name("Bench Press")
+                .difficulty(Difficulty.INTERMEDIATE)
+                .description("Flat bench press")
+                .categories(List.of(CategoryResponse.builder().id(1L).name("Chest").build()))
+                .build();
+
         when(exerciseMapper.toResponse(exercise1)).thenReturn(response);
 
         PageResponseDTO<ExerciseResponse> result = exerciseService.search(filter, pageable);
@@ -109,47 +165,88 @@ class ExerciseServiceTest {
         assertThat(result.getPage()).isZero();
         assertThat(result.getSize()).isEqualTo(2);
 
+        ExerciseResponse first = result.getContent().get(0);
+        assertThat(first.getName()).isEqualTo("Bench Press");
+        assertThat(first.getDifficulty()).isEqualTo(Difficulty.INTERMEDIATE);
+        assertThat(first.getCategories()).extracting("name").containsExactly("Chest");
     }
+
 
     @Test
     @DisplayName("Without filters uses findAll and maps to DTO")
     void searchNoFiltersUsesFindAllTest() {
         Pageable pageable = PageRequest.of(1, 3);
-        ExerciseFilterRequest filter = new ExerciseFilterRequest(); // ambos null
+        ExerciseFilterRequest filter = new ExerciseFilterRequest();
 
-        Exercise e = new Exercise();
-        e.setId(4L);
-        e.setName("Squat");
-        e.setMuscleGroup(MuscleGroup.LEGS);
+        Category legs = new Category(3L, "Legs");
+
+        Exercise e = Exercise.builder()
+                .id(4L)
+                .name("Squat")
+                .difficulty(Difficulty.INTERMEDIATE)
+                .description("Barbell back squat")
+                .categories(Set.of(legs))
+                .build();
+
         Page<Exercise> page = new PageImpl<>(List.of(e), pageable, 4);
         when(repository.findAll(pageable)).thenReturn(page);
 
-        ExerciseResponse r = ExerciseResponse.builder().id(4L).name("Squat").muscleGroup(MuscleGroup.LEGS).build();
+        ExerciseResponse r = ExerciseResponse.builder()
+                .id(4L)
+                .name("Squat")
+                .difficulty(Difficulty.INTERMEDIATE)
+                .description("Barbell back squat")
+                .categories(List.of(
+                        CategoryResponse.builder().id(3L).name("Legs").build()
+                ))
+                .build();
+
         when(exerciseMapper.toResponse(e)).thenReturn(r);
 
         PageResponseDTO<ExerciseResponse> result = exerciseService.search(filter, pageable);
 
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getTotalElements()).isEqualTo(4);
+        assertThat(result.getContent().get(0).getName()).isEqualTo("Squat");
+        assertThat(result.getContent().get(0).getDifficulty()).isEqualTo(Difficulty.INTERMEDIATE);
+        assertThat(result.getContent().get(0).getCategories()).extracting("name").containsExactly("Legs");
     }
 
+
     @Test
-    @DisplayName("Throws BadRequestException when both name and muscleGroup are provided")
+    @DisplayName("Throws BadRequestException when both name and categoryIds are provided")
     void searchBothFiltersBadRequestTest() {
         Pageable pageable = PageRequest.of(0, 10);
         ExerciseFilterRequest filter = new ExerciseFilterRequest();
         filter.setName("press");
-        filter.setMuscleGroup(MuscleGroup.CHEST);
+        filter.setCategoryIds(List.of(1L, 2L));
 
         assertThrows(BadRequestException.class, () -> exerciseService.search(filter, pageable));
     }
 
+
     @Test
     @DisplayName("Returns ExerciseResponse for an existing id")
-    void getByIdTest(){
-        Exercise exercise1 = new Exercise(1L, "testName", MuscleGroup.CHEST, "");
-        ExerciseResponse response1 = ExerciseResponse.builder().id(1L).name("testName")
-                .muscleGroup(MuscleGroup.CHEST).description("").build();
+    void getByIdTest() {
+        Category chest = new Category(1L, "Chest");
+
+        Exercise exercise1 = Exercise.builder()
+                .id(1L)
+                .name("testName")
+                .difficulty(Difficulty.INTERMEDIATE)
+                .description("desc")
+                .categories(Set.of(chest))
+                .build();
+
+        ExerciseResponse response1 = ExerciseResponse.builder()
+                .id(1L)
+                .name("testName")
+                .difficulty(Difficulty.INTERMEDIATE)
+                .description("desc")
+                .categories(List.of(
+                        CategoryResponse.builder().id(1L).name("Chest").build()
+                ))
+                .build();
 
         when(repository.findById(1L)).thenReturn(Optional.of(exercise1));
         when(exerciseMapper.toResponse(exercise1)).thenReturn(response1);
@@ -158,12 +255,14 @@ class ExerciseServiceTest {
 
         assertEquals(1L, result.getId());
         assertEquals("testName", result.getName());
-        assertEquals(MuscleGroup.CHEST.name(), result.getMuscleGroup().name());
+        assertEquals(Difficulty.INTERMEDIATE, result.getDifficulty());
+        assertThat(result.getCategories()).extracting("name").containsExactly("Chest");
     }
+
 
     @Test
     @DisplayName("Throws NotFound when id does not exist")
-    void getByIdThrowException(){
+    void getById_notFound(){
         when(repository.findById(999L)).thenReturn(Optional.empty());
 
         AppException exception = assertThrows(AppException.class, () -> exerciseService.getById(999L));
@@ -174,32 +273,41 @@ class ExerciseServiceTest {
 
     @Test
     @DisplayName("Creates exercise and returns mapped response")
-    void createExerciseTest(){
+    void createExerciseTest() {
+        Category chest = new Category(1L, "Chest");
+        List<Long> categoryIds = List.of(1L);
 
         ExerciseCreateRequest req = new ExerciseCreateRequest();
         req.setName("Bench Press");
-        req.setMuscleGroup(MuscleGroup.CHEST);
+        req.setDifficulty(Difficulty.INTERMEDIATE);
         req.setDescription("Classic chest press");
+        req.setCategoryIds(categoryIds);
 
-        Exercise toSave = new Exercise();
-        toSave.setName("Bench Press");
-        toSave.setMuscleGroup(MuscleGroup.CHEST);
-        toSave.setDescription("Classic chest press");
+        Exercise toSave = Exercise.builder()
+                .name("Bench Press")
+                .difficulty(Difficulty.INTERMEDIATE)
+                .description("Classic chest press")
+                .categories(Set.of(chest))
+                .build();
 
-        Exercise saved = new Exercise();
-        saved.setId(10L);
-        saved.setName("Bench Press");
-        saved.setMuscleGroup(MuscleGroup.CHEST);
-        saved.setDescription("Classic chest press");
+        Exercise saved = Exercise.builder()
+                .id(10L)
+                .name("Bench Press")
+                .difficulty(Difficulty.INTERMEDIATE)
+                .description("Classic chest press")
+                .categories(Set.of(chest))
+                .build();
 
         ExerciseResponse resp = ExerciseResponse.builder()
                 .id(10L)
                 .name("Bench Press")
-                .muscleGroup(MuscleGroup.CHEST)
+                .difficulty(Difficulty.INTERMEDIATE)
                 .description("Classic chest press")
+                .categories(List.of(CategoryResponse.builder().id(1L).name("Chest").build()))
                 .build();
 
-        when(repository.existsByNameIgnoreCaseAndMuscleGroup("Bench Press", MuscleGroup.CHEST)).thenReturn(false);
+        when(repository.existsByNameIgnoreCase("Bench Press")).thenReturn(false);
+        when(categoryRepository.findAllById(categoryIds)).thenReturn(List.of(chest));
         when(exerciseMapper.toEntity(req)).thenReturn(toSave);
         when(repository.save(toSave)).thenReturn(saved);
         when(exerciseMapper.toResponse(saved)).thenReturn(resp);
@@ -208,20 +316,22 @@ class ExerciseServiceTest {
 
         assertEquals(10L, result.getId());
         assertEquals("Bench Press", result.getName());
-        assertEquals(MuscleGroup.CHEST, result.getMuscleGroup());
+        assertEquals(Difficulty.INTERMEDIATE, result.getDifficulty());
         assertEquals("Classic chest press", result.getDescription());
+        assertThat(result.getCategories()).extracting("name").containsExactly("Chest");
     }
 
+
     @Test
-    @DisplayName("Throws Conflict when exercise already exists (name + muscleGroup)")
+    @DisplayName("Throws Conflict when exercise already exists (same name)")
     void createExercise_conflict() {
         ExerciseCreateRequest req = new ExerciseCreateRequest();
         req.setName("  Bench Press  ");
-        req.setMuscleGroup(MuscleGroup.CHEST);
+        req.setDifficulty(Difficulty.INTERMEDIATE);
         req.setDescription("dup");
+        req.setCategoryIds(List.of(1L));
 
-        when(repository.existsByNameIgnoreCaseAndMuscleGroup("Bench Press", MuscleGroup.CHEST))
-                .thenReturn(true);
+        when(repository.existsByNameIgnoreCase("Bench Press")).thenReturn(true);
 
         ConflictException ex = assertThrows(ConflictException.class,
                 () -> exerciseService.createExercise(req));
@@ -230,33 +340,42 @@ class ExerciseServiceTest {
         assertEquals(ErrorCode.CONFLICT, ex.getCode());
     }
 
+
     @Test
     @DisplayName("Updates only provided fields and returns mapped response")
     void updateExercise_partial_ok() {
         Long id = 1L;
-        Exercise existing = new Exercise();
-        existing.setId(id);
-        existing.setName("Bench Press");
-        existing.setMuscleGroup(MuscleGroup.CHEST);
-        existing.setDescription("old description");
+        Category chest = new Category(1L, "Chest");
+
+        Exercise existing = Exercise.builder()
+                .id(id)
+                .name("Bench Press")
+                .difficulty(Difficulty.INTERMEDIATE)
+                .description("old description")
+                .categories(Set.of(chest))
+                .build();
 
         ExerciseUpdateRequest req = new ExerciseUpdateRequest();
         req.setDescription(JsonNullable.of("new description"));
 
-        Exercise updated = new Exercise();
-        updated.setId(id);
-        updated.setName("Bench Press");
-        updated.setMuscleGroup(MuscleGroup.CHEST);
-        updated.setDescription("new description");
+        Exercise updated = Exercise.builder()
+                .id(id)
+                .name("Bench Press")
+                .difficulty(Difficulty.INTERMEDIATE)
+                .description("new description")
+                .categories(Set.of(chest))
+                .build();
 
         ExerciseResponse resp = ExerciseResponse.builder()
                 .id(id)
                 .name("Bench Press")
-                .muscleGroup(MuscleGroup.CHEST)
+                .difficulty(Difficulty.INTERMEDIATE)
                 .description("new description")
+                .categories(List.of(CategoryResponse.builder().id(1L).name("Chest").build()))
                 .build();
 
         when(repository.findById(id)).thenReturn(Optional.of(existing));
+        when(repository.existsByNameIgnoreCaseAndIdNot("Bench Press", id)).thenReturn(false);
         when(repository.save(any(Exercise.class))).thenReturn(updated);
         when(exerciseMapper.toResponse(updated)).thenReturn(resp);
 
@@ -264,9 +383,11 @@ class ExerciseServiceTest {
 
         assertEquals(id, result.getId());
         assertEquals("Bench Press", result.getName());
-        assertEquals(MuscleGroup.CHEST, result.getMuscleGroup());
+        assertEquals(Difficulty.INTERMEDIATE, result.getDifficulty());
         assertEquals("new description", result.getDescription());
+        assertThat(result.getCategories()).extracting("name").containsExactly("Chest");
     }
+
 
     @Test
     @DisplayName("Throws NotFound when updating a non-existing id")
@@ -287,22 +408,25 @@ class ExerciseServiceTest {
 
 
     @Test
-    @DisplayName("Throws Conflict when updating to name+group that belongs to a different id")
+    @DisplayName("Throws Conflict when updating to a name that belongs to a different id")
     void updateExercise_conflict_excludingSelf() {
         Long id = 1L;
-        Exercise existing = new Exercise();
-        existing.setId(id);
-        existing.setName("Incline Press");
-        existing.setMuscleGroup(MuscleGroup.CHEST);
-        existing.setDescription("old");
+
+        Category chest = new Category(1L, "Chest");
+
+        Exercise existing = Exercise.builder()
+                .id(id)
+                .name("Incline Press")
+                .difficulty(Difficulty.INTERMEDIATE)
+                .description("old")
+                .categories(Set.of(chest))
+                .build();
 
         ExerciseUpdateRequest req = new ExerciseUpdateRequest();
         req.setName(JsonNullable.of("Bench Press"));
-        req.setMuscleGroup(JsonNullable.of(MuscleGroup.CHEST));
 
         when(repository.findById(id)).thenReturn(Optional.of(existing));
-        when(repository.existsByNameIgnoreCaseAndMuscleGroupAndIdNot("Bench Press", MuscleGroup.CHEST, id))
-                .thenReturn(true);
+        when(repository.existsByNameIgnoreCaseAndIdNot("Bench Press", id)).thenReturn(true);
 
         ConflictException ex = assertThrows(ConflictException.class,
                 () -> exerciseService.updateExercise(id, req));
@@ -311,33 +435,42 @@ class ExerciseServiceTest {
         assertEquals(ErrorCode.CONFLICT, ex.getCode());
     }
 
+
     @Test
     @DisplayName("Updates when only description changes; uniqueness check excludes current id")
     void updateExercise_onlyDescription_ok() {
-        // arrange
         Long id = 1L;
-        Exercise existing = new Exercise();
-        existing.setId(id);
-        existing.setName("Incline Press");
-        existing.setMuscleGroup(MuscleGroup.CHEST);
-        existing.setDescription("old");
+        Category chest = new Category(1L, "Chest");
+
+        Exercise existing = Exercise.builder()
+                .id(id)
+                .name("Incline Press")
+                .difficulty(Difficulty.INTERMEDIATE)
+                .description("old")
+                .categories(Set.of(chest))
+                .build();
 
         ExerciseUpdateRequest req = new ExerciseUpdateRequest();
         req.setDescription(JsonNullable.of("new"));
 
-        Exercise updated = new Exercise();
-        updated.setId(id);
-        updated.setName("Incline Press");
-        updated.setMuscleGroup(MuscleGroup.CHEST);
-        updated.setDescription("new");
+        Exercise updated = Exercise.builder()
+                .id(id)
+                .name("Incline Press")
+                .difficulty(Difficulty.INTERMEDIATE)
+                .description("new")
+                .categories(Set.of(chest))
+                .build();
 
         ExerciseResponse resp = ExerciseResponse.builder()
-                .id(id).name("Incline Press").muscleGroup(MuscleGroup.CHEST).description("new")
+                .id(id)
+                .name("Incline Press")
+                .difficulty(Difficulty.INTERMEDIATE)
+                .description("new")
+                .categories(List.of(CategoryResponse.builder().id(1L).name("Chest").build()))
                 .build();
 
         when(repository.findById(id)).thenReturn(Optional.of(existing));
-        when(repository.existsByNameIgnoreCaseAndMuscleGroupAndIdNot("Incline Press", MuscleGroup.CHEST, id))
-                .thenReturn(false);
+        when(repository.existsByNameIgnoreCaseAndIdNot("Incline Press", id)).thenReturn(false);
         when(repository.save(any(Exercise.class))).thenReturn(updated);
         when(exerciseMapper.toResponse(updated)).thenReturn(resp);
 
@@ -345,10 +478,10 @@ class ExerciseServiceTest {
 
         assertEquals(id, result.getId());
         assertEquals("Incline Press", result.getName());
-        assertEquals(MuscleGroup.CHEST, result.getMuscleGroup());
+        assertEquals(Difficulty.INTERMEDIATE, result.getDifficulty());
         assertEquals("new", result.getDescription());
+        assertThat(result.getCategories()).extracting("name").containsExactly("Chest");
     }
-
 
 
     @Test
