@@ -36,5 +36,8 @@ public class ExerciseCreateRequest {
     @NotEmpty(message = "At least one category ID must be provided")
     @Schema(description = "List of category IDs associated with the exercise.", example = "[1, 3]")
     private List<Long> categoryIds;
+
+    @Schema(description = "Optional public URL of the exercise image.", example = "/images/bench-press.jpg")
+    private String imageUrl;
 }
 

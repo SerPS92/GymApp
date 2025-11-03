@@ -39,6 +39,14 @@ public class Exercise {
     @Column(nullable = false, length = 20)
     private Difficulty difficulty;
 
-    //TODO imagen
+    @Column(length = 255, nullable = true)
+    String imageUrl;
+
+    @Column(length = 100, nullable = true)
+    String imageName;
+
+    @Column(length = 255, nullable = true)
+    String imagePath;
+
     //TODO creatorId
 }

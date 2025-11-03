@@ -27,4 +27,13 @@ public class ExerciseResponse {
 
     @Schema(description = "List of associated categories.")
     List<CategoryResponse> categories;
+
+    @Schema(description = "Public URL of the exercise image.", example = "https://cdn.gymapp.com/images/bench-press.jpg")
+    String imageUrl;
+
+    @Schema(description = "Original or generated image name.", example = "bench-press.jpg")
+    String imageName;
+
+    @Schema(description = "Internal storage path or key of the image.", example = "exercises/bench-press.jpg")
+    String imagePath;
 }

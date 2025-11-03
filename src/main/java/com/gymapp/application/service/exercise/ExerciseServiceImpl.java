@@ -109,6 +109,11 @@ public class ExerciseServiceImpl implements ExerciseService{
         Exercise exercise = exerciseMapper.toEntity(request);
         exercise.setCategories(new HashSet<>(categories));
 
+        //Imagen MVP -> Siguiente versión incluye la lógica real de subida
+        exercise.setImageUrl(request.getImageUrl() != null ? request.getImageUrl() : "/images/default.jpg");
+        exercise.setImageName(null);
+        exercise.setImagePath(null);
+
         Exercise saved = exerciseRepository.save(exercise);
 
         return exerciseMapper.toResponse(saved);
