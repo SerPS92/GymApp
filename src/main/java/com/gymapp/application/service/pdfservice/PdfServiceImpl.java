@@ -116,7 +116,7 @@ public class PdfServiceImpl implements PdfService{
 
         PdfPTable headerTable = new PdfPTable(2);
         headerTable.setWidthPercentage(100);
-        headerTable.setWidths(new float[]{3f, 2f}); // proporción: 60% título, 40% fechas
+        headerTable.setWidths(new float[]{3f, 2f});
 
         PdfPCell titleCell = new PdfPCell(new Phrase(titleText, titleFont));
         titleCell.setBorder(Rectangle.NO_BORDER);
@@ -223,7 +223,6 @@ public class PdfServiceImpl implements PdfService{
             if (currentRowCount == rowsPerPage && row < maxRows) {
                 document.add(currentTable);
 
-                // ✅ Añadir número de página
                 Paragraph pageIndicator = new Paragraph(
                         String.format("Page %d / %d", pageNumber, totalPages),
                         new Font(Font.HELVETICA, 9, Font.ITALIC, Color.GRAY)
@@ -232,11 +231,9 @@ public class PdfServiceImpl implements PdfService{
                 pageIndicator.setSpacingBefore(6f);
                 document.add(pageIndicator);
 
-                // Nueva página
                 document.newPage();
                 pageNumber++;
 
-                // Nueva tabla sin headers
                 currentTable = new PdfPTable(daysOfWeek.size());
                 currentTable.setWidthPercentage(100);
                 currentTable.setWidths(new float[]{2f, 2f, 2f, 2f, 2f, 2f, 2f});
@@ -245,7 +242,6 @@ public class PdfServiceImpl implements PdfService{
             }
         }
 
-        // Añadir la última página y su indicador
         if (currentRowCount > 0) {
             document.add(currentTable);
 
@@ -258,9 +254,6 @@ public class PdfServiceImpl implements PdfService{
             document.add(pageIndicator);
         }
     }
-
-
-
 
     private PdfPCell createExerciseCell(
             Exercise exercise,
@@ -283,27 +276,33 @@ public class PdfServiceImpl implements PdfService{
             }
         }
 
-        String line = formatExerciseLine(ex);
-        String content = exercise.getName() + "\n" + line;
-
-        Paragraph paragraph = new Paragraph(content, new Font(Font.HELVETICA, fontSize));
-        paragraph.setAlignment(Element.ALIGN_CENTER);
-        cell.addElement(paragraph);
-
-        return cell;
-    }
-
-    private String formatExerciseLine(ProgramExerciseRequest ex) {
+        String sets = ex.getSets() != null ? ex.getSets() : "-";
+        String reps = ex.getReps() != null ? ex.getReps() : "-";
         String rest = ex.getRestTime() != null && !ex.getRestTime().isBlank()
                 ? ex.getRestTime().replace("\"", "") + "\""
                 : "";
+        String notes = (ex.getNotes() != null && !ex.getNotes().isBlank()) ? ex.getNotes() : "";
 
-        String sets = ex.getSets() != null ? ex.getSets() : "-";
-        String reps = ex.getReps() != null ? ex.getReps() : "-";
+        Font nameFont = new Font(Font.HELVETICA, fontSize - 1, Font.BOLD);
+        Font dataFont = new Font(Font.HELVETICA, fontSize - 1);
+        Font noteFont = new Font(Font.HELVETICA, fontSize - 1, Font.ITALIC, new Color(120, 120, 120)); // gris suave
 
-        return rest.isEmpty()
-                ? String.format("%sx%s", sets, reps)
-                : String.format("%sx%s - %s", sets, reps, rest);
+        Chunk nameChunk = new Chunk(exercise.getName(), nameFont);
+        Chunk dataChunk = new Chunk(" " + sets + "x" + reps + " " + rest, dataFont);
+        Chunk noteChunk = notes.isEmpty() ? new Chunk("") : new Chunk(" " + notes, noteFont);
+
+        Phrase phrase = new Phrase();
+        phrase.add(nameChunk);
+        phrase.add(dataChunk);
+        phrase.add(noteChunk);
+
+        Paragraph paragraph = new Paragraph(phrase);
+        paragraph.setAlignment(Element.ALIGN_CENTER);
+        paragraph.setLeading(11f);
+        paragraph.setSpacingBefore(2f);
+
+        cell.addElement(paragraph);
+        return cell;
     }
     
 }

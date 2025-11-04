@@ -2,6 +2,7 @@ package com.gymapp.api.dto.programexercise.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -31,6 +32,7 @@ public class ProgramExerciseRequest {
     @Schema(description = "Day of the week for this exercise.", example = "Monday")
     String day;
 
+    @Size(max = 15, message = "notes must not exceed 15 characters")
     @Schema(description = "Additional notes for this exercise.", example = "Maintain controlled tempo")
     String notes;
 

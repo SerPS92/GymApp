@@ -2,6 +2,7 @@ package com.gymapp.api.controller.program;
 
 import com.gymapp.api.dto.program.request.ProgramRequest;
 import com.gymapp.application.service.pdfservice.PdfService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +42,7 @@ public class ProgramController implements ProgramApi{
     }
 
     @Override
-    public ResponseEntity<byte[]> generateProgramPdf(ProgramRequest request) {
+    public ResponseEntity<byte[]> generateProgramPdf(@Valid ProgramRequest request) {
         byte[] pdfBytes = pdfService.generateProgramPdf(request);
         log.info("Pdf generated");
         return ResponseEntity.ok()

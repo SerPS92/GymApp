@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,5 +49,5 @@ public interface ProgramApi {
                             schema = @Schema(implementation = org.springframework.http.ProblemDetail.class)))
     })
     @PostMapping("/pdf")
-    ResponseEntity<byte[]> generateProgramPdf(@RequestBody ProgramRequest request);
+    ResponseEntity<byte[]> generateProgramPdf(@Valid @RequestBody ProgramRequest request);
 }
