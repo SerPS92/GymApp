@@ -1,4 +1,4 @@
-package com.gymapp.application.service.pdfservice;
+package com.gymapp.application.service.pdf;
 
 import com.gymapp.api.dto.program.request.ProgramRequest;
 import com.gymapp.api.dto.programexercise.request.ProgramExerciseRequest;
@@ -140,24 +140,34 @@ public class PdfServiceImpl implements PdfService{
     private void addCalendarTable(Document document, ProgramRequest request, Map<Long, Exercise> exerciseMap)
             throws DocumentException {
 
+        // Agrupar ejercicios por día
         Map<String, List<ProgramExerciseRequest>> exercisesByDay = request.getProgramExercises().stream()
                 .collect(Collectors.groupingBy(ProgramExerciseRequest::getDay));
 
-        List<String> daysOfWeek = List.of("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
+        // Lista completa de días en orden
+        List<String> allDays = List.of("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
 
-        PdfPTable table = new PdfPTable(7);
-        table.setWidthPercentage(100);
-        table.setWidths(new float[]{2f, 2f, 2f, 2f, 2f, 2f, 2f});
+        // Filtrar días que tienen ejercicios
+        List<String> daysWithExercises = allDays.stream()
+                .filter(day -> exercisesByDay.containsKey(day) && !exercisesByDay.get(day).isEmpty())
+                .toList();
 
-        int maxRows = exercisesByDay.values().stream()
-                .mapToInt(List::size)
+        if (daysWithExercises.isEmpty()) {
+            Paragraph emptyMsg = new Paragraph("No exercises available for this program.",
+                    new Font(Font.HELVETICA, 12, Font.ITALIC, Color.GRAY));
+            emptyMsg.setAlignment(Element.ALIGN_CENTER);
+            document.add(emptyMsg);
+            return;
+        }
+
+        // Calcular filas máximas
+        int maxRows = daysWithExercises.stream()
+                .mapToInt(day -> exercisesByDay.get(day).size())
                 .max()
                 .orElse(1);
 
-        fillExerciseRows(document, daysOfWeek, exercisesByDay, exerciseMap, maxRows);
-
-
-        document.add(table);
+        // Generar las filas
+        fillExerciseRows(document, daysWithExercises, exercisesByDay, exerciseMap, maxRows);
     }
 
     private void addDayHeaders(PdfPTable table, List<String> daysOfWeek) {
@@ -173,7 +183,7 @@ public class PdfServiceImpl implements PdfService{
 
     private void fillExerciseRows(
             Document document,
-            List<String> daysOfWeek,
+            List<String> daysWithExercises,
             Map<String, List<ProgramExerciseRequest>> exercisesByDay,
             Map<Long, Exercise> exerciseMap,
             int maxRows) throws DocumentException {
@@ -196,15 +206,19 @@ public class PdfServiceImpl implements PdfService{
         int pageNumber = 1;
         int totalPages = (int) Math.ceil((double) maxRows / rowsPerPage);
 
-        PdfPTable currentTable = new PdfPTable(daysOfWeek.size());
+        PdfPTable currentTable = new PdfPTable(daysWithExercises.size());
         currentTable.setWidthPercentage(100);
-        currentTable.setWidths(new float[]{2f, 2f, 2f, 2f, 2f, 2f, 2f});
-        addDayHeaders(currentTable, daysOfWeek);
+
+        float[] widths = new float[daysWithExercises.size()];
+        for (int i = 0; i < widths.length; i++) widths[i] = 2f;
+        currentTable.setWidths(widths);
+
+        addDayHeaders(currentTable, daysWithExercises);
 
         int currentRowCount = 0;
 
         for (int row = 1; row <= maxRows; row++) {
-            for (String day : daysOfWeek) {
+            for (String day : daysWithExercises) {
                 List<ProgramExerciseRequest> exercises =
                         exercisesByDay.getOrDefault(day, Collections.emptyList());
                 exercises.sort(Comparator.comparing(ProgramExerciseRequest::getPosition));
@@ -234,10 +248,11 @@ public class PdfServiceImpl implements PdfService{
                 document.newPage();
                 pageNumber++;
 
-                currentTable = new PdfPTable(daysOfWeek.size());
+                currentTable = new PdfPTable(daysWithExercises.size());
                 currentTable.setWidthPercentage(100);
-                currentTable.setWidths(new float[]{2f, 2f, 2f, 2f, 2f, 2f, 2f});
+                currentTable.setWidths(widths);
 
+                addDayHeaders(currentTable, daysWithExercises);
                 currentRowCount = 0;
             }
         }
@@ -268,13 +283,14 @@ public class PdfServiceImpl implements PdfService{
         if (exercise.getImageUrl() != null && !exercise.getImageUrl().isBlank()) {
             try {
                 Image img = Image.getInstance("src/main/resources/static" + exercise.getImageUrl());
-                img.scaleToFit(imageSize, imageSize);
+                img.scaleAbsolute(imageSize, imageSize); // 👈 fuerza tamaño fijo
                 img.setAlignment(Element.ALIGN_CENTER);
                 cell.addElement(img);
             } catch (Exception e) {
                 log.warn("Could not load image for exercise {}: {}", exercise.getName(), e.getMessage());
             }
         }
+
 
         String sets = ex.getSets() != null ? ex.getSets() : "-";
         String reps = ex.getReps() != null ? ex.getReps() : "-";

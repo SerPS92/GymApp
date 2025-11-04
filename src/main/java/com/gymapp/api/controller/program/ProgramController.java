@@ -1,7 +1,7 @@
 package com.gymapp.api.controller.program;
 
 import com.gymapp.api.dto.program.request.ProgramRequest;
-import com.gymapp.application.service.pdfservice.PdfService;
+import com.gymapp.application.service.pdf.PdfService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
