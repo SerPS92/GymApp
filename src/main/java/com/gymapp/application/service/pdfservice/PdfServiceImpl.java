@@ -8,6 +8,7 @@ import com.gymapp.shared.error.AppException;
 import com.gymapp.shared.error.ErrorCode;
 import com.lowagie.text.Font;
 import com.lowagie.text.Image;
+import com.lowagie.text.Rectangle;
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
@@ -104,25 +105,37 @@ public class PdfServiceImpl implements PdfService{
     }
 
     private void addHeader(Document document, ProgramRequest request) throws DocumentException {
-        String titleText = request.getTitle() != null && !request.getTitle().isBlank()
+        Font titleFont = new Font(Font.HELVETICA, 16, Font.BOLD);
+        Font dateFont = new Font(Font.HELVETICA, 11);
+
+        String titleText = (request.getTitle() != null && !request.getTitle().isBlank())
                 ? request.getTitle()
                 : "Training Program";
 
-        Paragraph title = new Paragraph(titleText, new Font(Font.HELVETICA, 18, Font.BOLD));
-        title.setAlignment(Element.ALIGN_CENTER);
-        document.add(title);
+        String dateText = String.format("From %s to %s", request.getStartDate(), request.getEndDate());
 
-        Paragraph dates = new Paragraph(
-                String.format("From %s to %s", request.getStartDate(), request.getEndDate()),
-                new Font(Font.HELVETICA, 12)
-        );
-        dates.setAlignment(Element.ALIGN_CENTER);
-        document.add(dates);
+        PdfPTable headerTable = new PdfPTable(2);
+        headerTable.setWidthPercentage(100);
+        headerTable.setWidths(new float[]{3f, 2f}); // proporción: 60% título, 40% fechas
+
+        PdfPCell titleCell = new PdfPCell(new Phrase(titleText, titleFont));
+        titleCell.setBorder(Rectangle.NO_BORDER);
+        titleCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+
+        PdfPCell dateCell = new PdfPCell(new Phrase(dateText, dateFont));
+        dateCell.setBorder(Rectangle.NO_BORDER);
+        dateCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+
+        headerTable.addCell(titleCell);
+        headerTable.addCell(dateCell);
+
+        document.add(headerTable);
 
         Paragraph spacer = new Paragraph(" ");
-        spacer.setSpacingAfter(4f);
+        spacer.setSpacingAfter(6f);
         document.add(spacer);
     }
+
 
     private void addCalendarTable(Document document, ProgramRequest request, Map<Long, Exercise> exerciseMap)
             throws DocumentException {
@@ -136,14 +149,13 @@ public class PdfServiceImpl implements PdfService{
         table.setWidthPercentage(100);
         table.setWidths(new float[]{2f, 2f, 2f, 2f, 2f, 2f, 2f});
 
-        addDayHeaders(table, daysOfWeek);
-
         int maxRows = exercisesByDay.values().stream()
                 .mapToInt(List::size)
                 .max()
                 .orElse(1);
 
-        fillExerciseRows(table, daysOfWeek, exercisesByDay, exerciseMap, maxRows);
+        fillExerciseRows(document, daysOfWeek, exercisesByDay, exerciseMap, maxRows);
+
 
         document.add(table);
     }
@@ -160,11 +172,11 @@ public class PdfServiceImpl implements PdfService{
     }
 
     private void fillExerciseRows(
-            PdfPTable table,
+            Document document,
             List<String> daysOfWeek,
             Map<String, List<ProgramExerciseRequest>> exercisesByDay,
             Map<Long, Exercise> exerciseMap,
-            int maxRows) {
+            int maxRows) throws DocumentException {
 
         float imageSize;
         float padding;
@@ -174,35 +186,81 @@ public class PdfServiceImpl implements PdfService{
             imageSize = 70f;
             padding = 6f;
             fontSize = 10;
-        } else if (maxRows == 6) {
+        } else {
             imageSize = 60f;
             padding = 5f;
             fontSize = 9;
-        } else if (maxRows == 7) {
-            imageSize = 50f;
-            padding = 4f;
-            fontSize = 8;
-        } else {
-            imageSize = 45f;
-            padding = 3f;
-            fontSize = 8;
         }
+
+        int rowsPerPage = 6;
+        int pageNumber = 1;
+        int totalPages = (int) Math.ceil((double) maxRows / rowsPerPage);
+
+        PdfPTable currentTable = new PdfPTable(daysOfWeek.size());
+        currentTable.setWidthPercentage(100);
+        currentTable.setWidths(new float[]{2f, 2f, 2f, 2f, 2f, 2f, 2f});
+        addDayHeaders(currentTable, daysOfWeek);
+
+        int currentRowCount = 0;
 
         for (int row = 1; row <= maxRows; row++) {
             for (String day : daysOfWeek) {
-                List<ProgramExerciseRequest> exercises = exercisesByDay.getOrDefault(day, Collections.emptyList());
+                List<ProgramExerciseRequest> exercises =
+                        exercisesByDay.getOrDefault(day, Collections.emptyList());
                 exercises.sort(Comparator.comparing(ProgramExerciseRequest::getPosition));
 
                 if (exercises.size() >= row) {
                     ProgramExerciseRequest ex = exercises.get(row - 1);
                     Exercise exercise = exerciseMap.get(ex.getExerciseId());
-                    table.addCell(createExerciseCell(exercise, ex, imageSize, padding, fontSize));
+                    currentTable.addCell(createExerciseCell(exercise, ex, imageSize, padding, fontSize));
                 } else {
-                    table.addCell("");
+                    currentTable.addCell("");
                 }
             }
+
+            currentRowCount++;
+
+            if (currentRowCount == rowsPerPage && row < maxRows) {
+                document.add(currentTable);
+
+                // ✅ Añadir número de página
+                Paragraph pageIndicator = new Paragraph(
+                        String.format("Page %d / %d", pageNumber, totalPages),
+                        new Font(Font.HELVETICA, 9, Font.ITALIC, Color.GRAY)
+                );
+                pageIndicator.setAlignment(Element.ALIGN_RIGHT);
+                pageIndicator.setSpacingBefore(6f);
+                document.add(pageIndicator);
+
+                // Nueva página
+                document.newPage();
+                pageNumber++;
+
+                // Nueva tabla sin headers
+                currentTable = new PdfPTable(daysOfWeek.size());
+                currentTable.setWidthPercentage(100);
+                currentTable.setWidths(new float[]{2f, 2f, 2f, 2f, 2f, 2f, 2f});
+
+                currentRowCount = 0;
+            }
+        }
+
+        // Añadir la última página y su indicador
+        if (currentRowCount > 0) {
+            document.add(currentTable);
+
+            Paragraph pageIndicator = new Paragraph(
+                    String.format("Page %d / %d", pageNumber, totalPages),
+                    new Font(Font.HELVETICA, 9, Font.ITALIC, Color.GRAY)
+            );
+            pageIndicator.setAlignment(Element.ALIGN_RIGHT);
+            pageIndicator.setSpacingBefore(6f);
+            document.add(pageIndicator);
         }
     }
+
+
+
 
     private PdfPCell createExerciseCell(
             Exercise exercise,
