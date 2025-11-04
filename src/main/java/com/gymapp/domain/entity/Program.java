@@ -26,6 +26,9 @@ public class Program {
     LocalDate startDate;
     LocalDate endDate;
 
+    @Column(length = 100)
+    String title;
+
     @OneToMany(mappedBy = "program", cascade = CascadeType.ALL, orphanRemoval = true)
     List<ProgramExercise> programExercises;
 

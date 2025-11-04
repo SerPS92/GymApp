@@ -13,60 +13,61 @@ INSERT INTO categories (id, name) VALUES
   (12, 'HIIT');
 
 
-INSERT INTO exercises (id, name, description, difficulty) VALUES
-  (1, 'Bench Press', 'Flat barbell bench press focusing on pectorals.', 'INTERMEDIATE'),
-  (2, 'Incline Bench Press', 'Incline barbell press emphasizing upper chest.', 'INTERMEDIATE'),
-  (3, 'Dumbbell Fly', 'Flat dumbbell fly for chest isolation.', 'BEGINNER'),
-  (4, 'Push Up', 'Bodyweight horizontal press.', 'BEGINNER'),
+INSERT INTO exercises (id, name, description, difficulty, image_url) VALUES
+  (1, 'Bench Press', 'Flat barbell bench press focusing on pectorals.', 'INTERMEDIATE', '/images/default.jpg'),
+  (2, 'Incline Bench Press', 'Incline barbell press emphasizing upper chest.', 'INTERMEDIATE', '/images/default.jpg'),
+  (3, 'Dumbbell Fly', 'Flat dumbbell fly for chest isolation.', 'BEGINNER', '/images/default.jpg'),
+  (4, 'Push Up', 'Bodyweight horizontal press.', 'BEGINNER', '/images/default.jpg'),
 
-  (5, 'Deadlift', 'Conventional barbell deadlift.', 'ADVANCED'),
-  (6, 'Barbell Row', 'Bent-over barbell row targeting lats.', 'INTERMEDIATE'),
-  (7, 'Pull Up', 'Bodyweight vertical pull.', 'INTERMEDIATE'),
-  (8, 'Lat Pulldown', 'Cable pulldown targeting lats.', 'BEGINNER'),
+  (5, 'Deadlift', 'Conventional barbell deadlift.', 'ADVANCED', '/images/default.jpg'),
+  (6, 'Barbell Row', 'Bent-over barbell row targeting lats.', 'INTERMEDIATE', '/images/default.jpg'),
+  (7, 'Pull Up', 'Bodyweight vertical pull.', 'INTERMEDIATE', '/images/default.jpg'),
+  (8, 'Lat Pulldown', 'Cable pulldown targeting lats.', 'BEGINNER', '/images/default.jpg'),
 
-  (9, 'Overhead Press', 'Standing barbell shoulder press.', 'INTERMEDIATE'),
-  (10, 'Lateral Raise', 'Dumbbell side raise for medial delts.', 'BEGINNER'),
-  (11, 'Face Pull', 'Cable face pull for rear delts.', 'BEGINNER'),
+  (9, 'Overhead Press', 'Standing barbell shoulder press.', 'INTERMEDIATE', '/images/default.jpg'),
+  (10, 'Lateral Raise', 'Dumbbell side raise for medial delts.', 'BEGINNER', '/images/default.jpg'),
+  (11, 'Face Pull', 'Cable face pull for rear delts.', 'BEGINNER', '/images/default.jpg'),
 
-  (12, 'Biceps Curl', 'Standing dumbbell curl.', 'BEGINNER'),
-  (13, 'Preacher Curl', 'EZ-bar preacher curl.', 'INTERMEDIATE'),
+  (12, 'Biceps Curl', 'Standing dumbbell curl.', 'BEGINNER', '/images/default.jpg'),
+  (13, 'Preacher Curl', 'EZ-bar preacher curl.', 'INTERMEDIATE', '/images/default.jpg'),
 
-  (14, 'Triceps Dip', 'Parallel bar dip targeting triceps.', 'INTERMEDIATE'),
-  (15, 'Triceps Pushdown', 'Cable pushdown with rope attachment.', 'BEGINNER'),
+  (14, 'Triceps Dip', 'Parallel bar dip targeting triceps.', 'INTERMEDIATE', '/images/default.jpg'),
+  (15, 'Triceps Pushdown', 'Cable pushdown with rope attachment.', 'BEGINNER', '/images/default.jpg'),
 
-  (16, 'Wrist Curl', 'Seated barbell wrist curl.', 'BEGINNER'),
-  (17, 'Reverse Wrist Curl', 'Seated barbell reverse wrist curl.', 'BEGINNER'),
+  (16, 'Wrist Curl', 'Seated barbell wrist curl.', 'BEGINNER', '/images/default.jpg'),
+  (17, 'Reverse Wrist Curl', 'Seated barbell reverse wrist curl.', 'BEGINNER', '/images/default.jpg'),
 
-  (18, 'Crunch', 'Floor crunch for abdominal flexion.', 'BEGINNER'),
-  (19, 'Hanging Knee Raise', 'Knees-to-chest on pull-up bar.', 'INTERMEDIATE'),
+  (18, 'Crunch', 'Floor crunch for abdominal flexion.', 'BEGINNER', '/images/default.jpg'),
+  (19, 'Hanging Knee Raise', 'Knees-to-chest on pull-up bar.', 'INTERMEDIATE', '/images/default.jpg'),
 
-  (20, 'Plank', 'Isometric hold for trunk stability.', 'BEGINNER'),
-  (21, 'Pallof Press', 'Anti-rotation cable press.', 'INTERMEDIATE'),
+  (20, 'Plank', 'Isometric hold for trunk stability.', 'BEGINNER', '/images/default.jpg'),
+  (21, 'Pallof Press', 'Anti-rotation cable press.', 'INTERMEDIATE', '/images/default.jpg'),
 
-  (22, 'Hip Thrust', 'Barbell hip thrust for glute hypertrophy.', 'INTERMEDIATE'),
-  (23, 'Glute Bridge', 'Bodyweight glute bridge.', 'BEGINNER'),
+  (22, 'Hip Thrust', 'Barbell hip thrust for glute hypertrophy.', 'INTERMEDIATE', '/images/default.jpg'),
+  (23, 'Glute Bridge', 'Bodyweight glute bridge.', 'BEGINNER', '/images/default.jpg'),
 
-  (24, 'Back Squat', 'Barbell squat to full depth.', 'ADVANCED'),
-  (25, 'Walking Lunge', 'Alternating forward lunges.', 'INTERMEDIATE'),
-  (26, 'Leg Press', 'Machine compound press.', 'BEGINNER'),
-  (27, 'Romanian Deadlift', 'Hip hinge targeting hamstrings.', 'INTERMEDIATE'),
+  (24, 'Back Squat', 'Barbell squat to full depth.', 'ADVANCED', '/images/default.jpg'),
+  (25, 'Walking Lunge', 'Alternating forward lunges.', 'INTERMEDIATE', '/images/default.jpg'),
+  (26, 'Leg Press', 'Machine compound press.', 'BEGINNER', '/images/default.jpg'),
+  (27, 'Romanian Deadlift', 'Hip hinge targeting hamstrings.', 'INTERMEDIATE', '/images/default.jpg'),
 
-  (28, 'Calf Raise', 'Standing calf raise.', 'BEGINNER'),
-  (29, 'Seated Calf Raise', 'Machine seated calf raise.', 'BEGINNER'),
+  (28, 'Calf Raise', 'Standing calf raise.', 'BEGINNER', '/images/default.jpg'),
+  (29, 'Seated Calf Raise', 'Machine seated calf raise.', 'BEGINNER', '/images/default.jpg'),
 
-  (30, 'Neck Flexion', 'Weighted neck flexion with harness.', 'BEGINNER'),
-  (31, 'Neck Extension', 'Weighted neck extension with harness.', 'BEGINNER'),
+  (30, 'Neck Flexion', 'Weighted neck flexion with harness.', 'BEGINNER', '/images/default.jpg'),
+  (31, 'Neck Extension', 'Weighted neck extension with harness.', 'BEGINNER', '/images/default.jpg'),
 
-  (32, 'Barbell Shrug', 'Barbell shrug for upper traps.', 'INTERMEDIATE'),
+  (32, 'Barbell Shrug', 'Barbell shrug for upper traps.', 'INTERMEDIATE', '/images/default.jpg'),
 
-  (33, 'Burpee', 'Bodyweight full-body conditioning movement.', 'ADVANCED'),
+  (33, 'Burpee', 'Bodyweight full-body conditioning movement.', 'ADVANCED', '/images/default.jpg'),
 
-  (34, 'Jump Rope', 'Steady jump rope cardio.', 'BEGINNER'),
-  (35, 'Rowing Machine', 'Cardio on indoor rower.', 'INTERMEDIATE'),
+  (34, 'Jump Rope', 'Steady jump rope cardio.', 'BEGINNER', '/images/default.jpg'),
+  (35, 'Rowing Machine', 'Cardio on indoor rower.', 'INTERMEDIATE', '/images/default.jpg'),
 
-  (36, 'Mountain Climbers', 'Dynamic core and cardio exercise.', 'BEGINNER'),
-  (37, 'Kettlebell Swing', 'Full-body movement for strength and cardio.', 'INTERMEDIATE'),
-  (38, 'Yoga Flow', 'Mobility and stretching sequence.', 'BEGINNER');
+  (36, 'Mountain Climbers', 'Dynamic core and cardio exercise.', 'BEGINNER', '/images/default.jpg'),
+  (37, 'Kettlebell Swing', 'Full-body movement for strength and cardio.', 'INTERMEDIATE', '/images/default.jpg'),
+  (38, 'Yoga Flow', 'Mobility and stretching sequence.', 'BEGINNER', '/images/default.jpg');
+
 
 
 INSERT INTO exercise_categories (exercise_id, category_id) VALUES

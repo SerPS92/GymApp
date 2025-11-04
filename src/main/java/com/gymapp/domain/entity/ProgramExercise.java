@@ -1,5 +1,6 @@
 package com.gymapp.domain.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -18,12 +19,15 @@ public class ProgramExercise {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    int reps;
-    int sets;
-    int restTime;
+    String reps;
+    String sets;
+    String restTime;
     @Column(name = "workout_day")
     String day;
     String notes;
+
+    @Schema(description = "Order position within the day (1 = top).", example = "2")
+    Integer position;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "program_id")
@@ -32,7 +36,5 @@ public class ProgramExercise {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "exercise_id")
     Exercise exercise;
-
-
 
 }

@@ -5,5 +5,6 @@ public enum ErrorCode {
     VALIDATION_ERROR,
     NOT_FOUND,
     CONFLICT,
-    INTERNAL_ERROR
+    INTERNAL_ERROR,
+    PDF_GENERATION_ERROR
 }
