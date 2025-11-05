@@ -45,6 +45,24 @@ public class PdfExerciseCellFactory {
         return cell;
     }
 
+    public static PdfPCell createTextOnlyCell(
+            Exercise exercise,
+            ProgramExerciseRequest ex,
+            float padding,
+            int fontSize) {
+
+        PdfPCell cell = new PdfPCell();
+        cell.setPadding(padding);
+
+        String[] data = formatExerciseData(ex);
+        Paragraph paragraph = buildTextOnlyParagraph(
+                exercise.getName(), data[0], data[1], data[2], data[3], fontSize
+        );
+
+        cell.addElement(paragraph);
+        return cell;
+    }
+
 
     private static String[] formatExerciseData(ProgramExerciseRequest ex) {
         String sets = ex.getSets() != null ? ex.getSets() : "-";
@@ -79,6 +97,35 @@ public class PdfExerciseCellFactory {
 
         return paragraph;
     }
+
+    private static Paragraph buildTextOnlyParagraph(
+            String exerciseName, String sets, String reps, String rest, String notes, float fontSize) {
+
+        Font nameFont = new Font(Font.HELVETICA, fontSize, Font.BOLD);
+        Font dataFont = new Font(Font.HELVETICA, fontSize - 1);
+        Font noteFont = new Font(Font.HELVETICA, fontSize - 1, Font.ITALIC, new Color(120, 120, 120));
+
+        Paragraph paragraph = new Paragraph();
+        paragraph.setAlignment(Element.ALIGN_CENTER);
+        paragraph.setLeading(11f);
+        paragraph.setSpacingBefore(2f);
+        paragraph.setSpacingAfter(2f);
+
+        paragraph.add(new Phrase(exerciseName, nameFont));
+        paragraph.add(Chunk.NEWLINE);
+
+        paragraph.add(new Phrase(sets + "x" + reps + " " + rest, dataFont));
+        paragraph.add(Chunk.NEWLINE);
+
+        if (!notes.isEmpty()) {
+            paragraph.add(new Phrase(notes, noteFont));
+        }
+
+        return paragraph;
+    }
+
+
+
 
 
 }

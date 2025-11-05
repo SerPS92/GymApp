@@ -2,5 +2,7 @@ package com.gymapp.domain.enums;
 
 public enum PdfFormatType {
     CALENDAR,
-    LIST
+    CALENDAR_NO_IMAGE,
+    MOBILE,
+    MOBILE_NO_IMAGE
 }
