@@ -38,12 +38,19 @@ public class PdfExerciseCellFactory {
 
         String[] data = formatExerciseData(ex);
         Paragraph paragraph = buildExerciseParagraph(
-                exercise.getName(), data[0], data[1], data[2], data[3], fontSize
+                exercise.getName(),
+                data[0],
+                data[1],
+                data[2],
+                data[3],
+                data[4],
+                fontSize
         );
 
         cell.addElement(paragraph);
         return cell;
     }
+
 
     public static PdfPCell createTextOnlyCell(
             Exercise exercise,
@@ -56,7 +63,13 @@ public class PdfExerciseCellFactory {
 
         String[] data = formatExerciseData(ex);
         Paragraph paragraph = buildTextOnlyParagraph(
-                exercise.getName(), data[0], data[1], data[2], data[3], fontSize
+                exercise.getName(),
+                data[0],
+                data[1],
+                data[2],
+                data[3],
+                data[4],
+                fontSize
         );
 
         cell.addElement(paragraph);
@@ -64,26 +77,36 @@ public class PdfExerciseCellFactory {
     }
 
 
+
     private static String[] formatExerciseData(ProgramExerciseRequest ex) {
         String sets = ex.getSets() != null ? ex.getSets() : "-";
         String reps = ex.getReps() != null ? ex.getReps() : "-";
         String rest = ex.getRestTime() != null && !ex.getRestTime().isBlank()
-                ? ex.getRestTime().replace("\"", "") + "\""
+                ? ex.getRestTime().replace("\"", "") + "s"
                 : "";
         String notes = (ex.getNotes() != null && !ex.getNotes().isBlank()) ? ex.getNotes() : "";
-        return new String[]{sets, reps, rest, notes};
+        String load = (ex.getIntensity() != null && !ex.getIntensity().isBlank()) ? ex.getIntensity() : "";
+        return new String[]{sets, reps, rest, load, notes};
     }
 
     private static Paragraph buildExerciseParagraph(
-            String exerciseName, String sets, String reps, String rest, String notes, float fontSize) {
+            String exerciseName, String sets, String reps, String intensity, String rest, String notes, float fontSize) {
 
         Font nameFont = new Font(Font.HELVETICA, fontSize - 1, Font.BOLD);
         Font dataFont = new Font(Font.HELVETICA, fontSize - 1);
         Font noteFont = new Font(Font.HELVETICA, fontSize - 1, Font.ITALIC, new Color(120, 120, 120));
 
         Chunk nameChunk = new Chunk(exerciseName, nameFont);
-        Chunk dataChunk = new Chunk(" " + sets + "x" + reps + " " + rest, dataFont);
-        Chunk noteChunk = notes.isEmpty() ? new Chunk("") : new Chunk(" " + notes, noteFont);
+
+        StringBuilder dataText = new StringBuilder(" " + sets + "x" + reps);
+        if (intensity != null && !intensity.isBlank()) dataText.append(" ").append(intensity);
+        if (rest != null && !rest.isBlank()) dataText.append(" ").append(rest);
+
+        Chunk dataChunk = new Chunk(dataText.toString(), dataFont);
+
+        Chunk noteChunk = notes.isEmpty()
+                ? new Chunk("")
+                : new Chunk(" " + notes, noteFont);
 
         Phrase phrase = new Phrase();
         phrase.add(nameChunk);
@@ -98,8 +121,10 @@ public class PdfExerciseCellFactory {
         return paragraph;
     }
 
+
+
     private static Paragraph buildTextOnlyParagraph(
-            String exerciseName, String sets, String reps, String rest, String notes, float fontSize) {
+            String exerciseName, String sets, String reps, String intensity, String rest, String notes, float fontSize) {
 
         Font nameFont = new Font(Font.HELVETICA, fontSize, Font.BOLD);
         Font dataFont = new Font(Font.HELVETICA, fontSize - 1);
@@ -114,18 +139,17 @@ public class PdfExerciseCellFactory {
         paragraph.add(new Phrase(exerciseName, nameFont));
         paragraph.add(Chunk.NEWLINE);
 
-        paragraph.add(new Phrase(sets + "x" + reps + " " + rest, dataFont));
+        StringBuilder dataText = new StringBuilder(sets + "x" + reps);
+        if (intensity != null && !intensity.isBlank()) dataText.append(" ").append(intensity);
+        if (rest != null && !rest.isBlank()) dataText.append(" ").append(rest);
+
+        paragraph.add(new Phrase(dataText.toString(), dataFont));
         paragraph.add(Chunk.NEWLINE);
 
-        if (!notes.isEmpty()) {
-            paragraph.add(new Phrase(notes, noteFont));
-        }
+        if (!notes.isEmpty()) paragraph.add(new Phrase(notes, noteFont));
 
         return paragraph;
     }
-
-
-
 
 
 }

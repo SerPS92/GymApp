@@ -149,8 +149,6 @@ public class PdfServiceImpl implements PdfService{
         fillTextOnlyRows(document, daysWithExercises, exercisesByDay, exerciseMap, maxRows);
     }
 
-
-
     private void fillExerciseRows(
             Document document,
             List<String> daysWithExercises,

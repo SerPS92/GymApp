@@ -29,7 +29,7 @@ public class PdfUtils {
     private PdfUtils() {}
 
     public static Document createDocument(ByteArrayOutputStream out) throws DocumentException {
-        Document document = new Document(PageSize.A4.rotate(), 36, 36, 10, 20);
+        Document document = new Document(PageSize.A4.rotate(), 36, 36, 10, 0);
         PdfWriter.getInstance(document, out);
         document.open();
         return document;

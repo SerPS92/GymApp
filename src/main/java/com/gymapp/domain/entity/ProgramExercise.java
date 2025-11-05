@@ -1,7 +1,9 @@
 package com.gymapp.domain.entity;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,14 +21,32 @@ public class ProgramExercise {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    String reps;
+
+    @NotNull
+    @Column(nullable = false, length = 2)
     String sets;
+
+    @NotNull
+    @Column(nullable = false, length = 5)
+    String reps;
+
+    @Column(length = 3)
     String restTime;
-    @Column(name = "workout_day")
+
+    @NotNull
+    @Column(name = "workout_day",nullable = false, length = 10)
     String day;
+
+    @Column(length = 15)
     String notes;
 
-    @Schema(description = "Order position within the day (1 = top).", example = "2")
+    @Column(length = 8)
+    String intensity;
+
+    @NotNull
+    @Column(nullable = false)
+    @Min(1)
+    @Max(20)
     Integer position;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
