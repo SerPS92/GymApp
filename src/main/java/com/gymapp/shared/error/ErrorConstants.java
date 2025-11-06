@@ -16,6 +16,7 @@ public class ErrorConstants {
 
     public static final String UNEXPECTED_ERROR_GENERATING_PDF_DOCUMENT = "Unexpected error generating PDF document";
     public static final String ERROR_GENERATING_PDF_DOCUMENT = "Error generating PDF document";
+    public static final String UNSUPPORTED_PDF_FORMAT_TYPE = "Unsupported PDF format type: ";
 
     public static final String EXERCISES_NOT_FOUND_WITH_IDS = "Exercises not found with ids: ";
 }

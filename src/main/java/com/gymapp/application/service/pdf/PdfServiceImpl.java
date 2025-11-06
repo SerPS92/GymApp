@@ -22,8 +22,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import static com.gymapp.shared.error.ErrorConstants.ERROR_GENERATING_PDF_DOCUMENT;
-import static com.gymapp.shared.error.ErrorConstants.UNEXPECTED_ERROR_GENERATING_PDF_DOCUMENT;
+import static com.gymapp.shared.error.ErrorConstants.*;
 
 @Service
 @RequiredArgsConstructor
@@ -34,12 +33,7 @@ public class PdfServiceImpl implements PdfService{
 
     @Override
     public byte[] generateProgramPdf(ProgramRequest programRequest) {
-        return switch (programRequest.getPdfFormatType()) {
-            case CALENDAR -> generateCalendarPdf(programRequest);
-            case CALENDAR_NO_IMAGE -> generateCalendarNoImagePdf(programRequest);
-            default ->
-                    throw new AppException(HttpStatus.BAD_REQUEST, ErrorCode.BAD_REQUEST, "Unsupported PDF format type");
-        };
+        return generateCalendarPdf(programRequest);
     }
 
     private byte[] generateCalendarPdf(ProgramRequest programRequest){
@@ -50,7 +44,15 @@ public class PdfServiceImpl implements PdfService{
             Document document = PdfUtils.createDocument(out);
             PdfUtils.addHeader(document, programRequest);
 
-            addCalendarTable(document, programRequest, exerciseMap);
+            switch (programRequest.getPdfFormatType()) {
+                case CALENDAR -> addCalendarTableGeneric(document, programRequest, exerciseMap, true);
+                case CALENDAR_NO_IMAGE -> addCalendarTableGeneric(document, programRequest, exerciseMap, false);
+                default -> throw new AppException(
+                        HttpStatus.BAD_REQUEST,
+                        ErrorCode.BAD_REQUEST,
+                        UNSUPPORTED_PDF_FORMAT_TYPE + programRequest.getPdfFormatType()
+                );
+            }
 
             document.close();
             return out.toByteArray();
@@ -74,41 +76,11 @@ public class PdfServiceImpl implements PdfService{
         }
     }
 
-    private byte[] generateCalendarNoImagePdf(ProgramRequest programRequest) {
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            Map<Long, Exercise> exerciseMap =
-                    PdfUtils.loadExercisesByIds(programRequest.getProgramExercises(), exerciseJpaRepository);
-
-            Document document = PdfUtils.createDocument(out);
-            PdfUtils.addHeader(document, programRequest);
-
-            addCalendarTableWithoutImages(document, programRequest, exerciseMap);
-
-            document.close();
-            return out.toByteArray();
-
-        } catch (DocumentException e) {
-            log.error("Error generating PDF (no image): {}", e.getMessage());
-            throw new AppException(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    ErrorCode.PDF_GENERATION_ERROR,
-                    ERROR_GENERATING_PDF_DOCUMENT,
-                    e
-            );
-        } catch (Exception e) {
-            log.error("Unexpected error generating PDF (no image): {}", e.getMessage());
-            throw new AppException(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    ErrorCode.PDF_GENERATION_ERROR,
-                    UNEXPECTED_ERROR_GENERATING_PDF_DOCUMENT,
-                    e
-            );
-        }
-    }
-
-
-    private void addCalendarTable(Document document, ProgramRequest request, Map<Long, Exercise> exerciseMap)
-            throws DocumentException {
+    private void addCalendarTableGeneric(
+            Document document,
+            ProgramRequest request,
+            Map<Long, Exercise> exerciseMap,
+            boolean withImages) throws DocumentException {
 
         Map<String, List<ProgramExerciseRequest>> exercisesByDay =
                 PdfUtils.groupExercisesByDay(document, request);
@@ -125,43 +97,23 @@ public class PdfServiceImpl implements PdfService{
                 .max()
                 .orElse(1);
 
-        fillExerciseRows(document, daysWithExercises, exercisesByDay, exerciseMap, maxRows);
+        fillExerciseRowsGeneric(document, daysWithExercises, exercisesByDay, exerciseMap, maxRows, withImages);
     }
 
-    private void addCalendarTableWithoutImages(Document document, ProgramRequest request, Map<Long, Exercise> exerciseMap)
-            throws DocumentException {
-
-        Map<String, List<ProgramExerciseRequest>> exercisesByDay =
-                PdfUtils.groupExercisesByDay(document, request);
-
-        if (exercisesByDay.isEmpty()) return;
-
-        List<String> allDays = List.of("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
-        List<String> daysWithExercises = allDays.stream()
-                .filter(day -> exercisesByDay.containsKey(day) && !exercisesByDay.get(day).isEmpty())
-                .toList();
-
-        int maxRows = daysWithExercises.stream()
-                .mapToInt(day -> exercisesByDay.get(day).size())
-                .max()
-                .orElse(1);
-
-        fillTextOnlyRows(document, daysWithExercises, exercisesByDay, exerciseMap, maxRows);
-    }
-
-    private void fillExerciseRows(
+    private void fillExerciseRowsGeneric(
             Document document,
             List<String> daysWithExercises,
             Map<String, List<ProgramExerciseRequest>> exercisesByDay,
             Map<Long, Exercise> exerciseMap,
-            int maxRows) throws DocumentException {
+            int maxRows,
+            boolean withImages) throws DocumentException {
 
-        float[] config = resolveLayoutConfig(maxRows);
-        float imageSize = config[0];
-        float padding = config[1];
-        int fontSize = (int) config[2];
+        float[] config = withImages ? resolveLayoutConfig(maxRows) : resolveLayoutConfigNoImage(maxRows);
+        PdfLayoutConfig layout = withImages
+                ? new PdfLayoutConfig(true, config[0], config[1], (int) config[2])
+                : new PdfLayoutConfig(false, 0, config[0], (int) config[1]);
 
-        int rowsPerPage = 6;
+        int rowsPerPage = withImages ? 6 : 10;
         int pageNumber = 1;
         int totalPages = (int) Math.ceil((double) maxRows / rowsPerPage);
 
@@ -171,29 +123,11 @@ public class PdfServiceImpl implements PdfService{
         int currentRowCount = 0;
 
         for (int row = 1; row <= maxRows; row++) {
-            for (String day : daysWithExercises) {
-                List<ProgramExerciseRequest> exercises =
-                        exercisesByDay.getOrDefault(day, Collections.emptyList());
-                exercises.sort(Comparator.comparing(ProgramExerciseRequest::getPosition));
-
-                if (exercises.size() >= row) {
-                    ProgramExerciseRequest ex = exercises.get(row - 1);
-                    Exercise exercise = exerciseMap.get(ex.getExerciseId());
-                    currentTable.addCell(PdfExerciseCellFactory.createExerciseCell(
-                            exercise, ex, imageSize, padding, fontSize
-                    ));
-                } else {
-                    currentTable.addCell("");
-                }
-            }
-
+            addExerciseRow(currentTable, row, daysWithExercises, exercisesByDay, exerciseMap, layout);
             currentRowCount++;
 
             if (currentRowCount == rowsPerPage && row < maxRows) {
-                document.add(currentTable);
-                PdfUtils.addPageIndicator(document, pageNumber, totalPages);
-                document.newPage();
-
+                PdfUtils.finalizePage(document, currentTable, pageNumber, totalPages);
                 pageNumber++;
                 currentTable = createBaseTable(daysWithExercises.size());
                 PdfUtils.addDayHeaders(currentTable, daysWithExercises);
@@ -202,67 +136,34 @@ public class PdfServiceImpl implements PdfService{
         }
 
         if (currentRowCount > 0) {
-            document.add(currentTable);
-            PdfUtils.addPageIndicator(document, pageNumber, totalPages);
+            PdfUtils.finalizePage(document, currentTable, pageNumber, totalPages);
         }
     }
 
-    private void fillTextOnlyRows(
-            Document document,
+    private void addExerciseRow(
+            PdfPTable table,
+            int row,
             List<String> daysWithExercises,
             Map<String, List<ProgramExerciseRequest>> exercisesByDay,
             Map<Long, Exercise> exerciseMap,
-            int maxRows) throws DocumentException {
+            PdfLayoutConfig layout) {
 
-        float[] config = resolveLayoutConfigNoImage(maxRows);
-        float padding = config[0];
-        int fontSize = (int) config[1];
-        int rowsPerPage = 10;
+        for (String day : daysWithExercises) {
+            List<ProgramExerciseRequest> exercises = exercisesByDay.getOrDefault(day, Collections.emptyList());
+            exercises.sort(Comparator.comparing(ProgramExerciseRequest::getPosition));
 
+            if (exercises.size() >= row) {
+                ProgramExerciseRequest ex = exercises.get(row - 1);
+                Exercise exercise = exerciseMap.get(ex.getExerciseId());
 
-        int pageNumber = 1;
-        int totalPages = (int) Math.ceil((double) maxRows / rowsPerPage);
-
-        PdfPTable currentTable = createBaseTable(daysWithExercises.size());
-        PdfUtils.addDayHeaders(currentTable, daysWithExercises);
-
-        int currentRowCount = 0;
-
-        for (int row = 1; row <= maxRows; row++) {
-            for (String day : daysWithExercises) {
-                List<ProgramExerciseRequest> exercises =
-                        exercisesByDay.getOrDefault(day, Collections.emptyList());
-                exercises.sort(Comparator.comparing(ProgramExerciseRequest::getPosition));
-
-                if (exercises.size() >= row) {
-                    ProgramExerciseRequest ex = exercises.get(row - 1);
-                    Exercise exercise = exerciseMap.get(ex.getExerciseId());
-                    currentTable.addCell(PdfExerciseCellFactory.createTextOnlyCell(exercise, ex, padding, fontSize));
-                } else {
-                    currentTable.addCell("");
-                }
+                table.addCell(layout.withImages()
+                        ? PdfExerciseCellFactory.createExerciseCell(exercise, ex, layout.imageSize(), layout.padding(), layout.fontSize())
+                        : PdfExerciseCellFactory.createTextOnlyCell(exercise, ex, layout.padding(), layout.fontSize()));
+            } else {
+                table.addCell("");
             }
-
-            currentRowCount++;
-
-            if (currentRowCount == rowsPerPage && row < maxRows) {
-                document.add(currentTable);
-                PdfUtils.addPageIndicator(document, pageNumber, totalPages);
-                document.newPage();
-
-                pageNumber++;
-                currentTable = createBaseTable(daysWithExercises.size());
-                PdfUtils.addDayHeaders(currentTable, daysWithExercises);
-                currentRowCount = 0;
-            }
-        }
-
-        if (currentRowCount > 0) {
-            document.add(currentTable);
-            PdfUtils.addPageIndicator(document, pageNumber, totalPages);
         }
     }
-
 
     private float[] resolveLayoutConfig(int maxRows) {
         if (maxRows <= 5) {
@@ -279,8 +180,6 @@ public class PdfServiceImpl implements PdfService{
         return new float[]{3.5f, 7};
     }
 
-
-
     private PdfPTable createBaseTable(int columnCount) throws DocumentException {
         PdfPTable table = new PdfPTable(columnCount);
         table.setWidthPercentage(100);
@@ -291,5 +190,7 @@ public class PdfServiceImpl implements PdfService{
 
         return table;
     }
+
+    private record PdfLayoutConfig(boolean withImages, float imageSize, float padding, int fontSize) {}
 
 }

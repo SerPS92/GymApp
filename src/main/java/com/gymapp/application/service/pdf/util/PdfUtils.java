@@ -67,6 +67,39 @@ public class PdfUtils {
         document.add(spacer);
     }
 
+    public static void addDayHeaders(PdfPTable table, List<String> daysOfWeek) {
+        Font headerFont = new Font(Font.HELVETICA, 12, Font.BOLD);
+        for (String day : daysOfWeek) {
+            PdfPCell header = new PdfPCell(new Phrase(day, headerFont));
+            header.setHorizontalAlignment(Element.ALIGN_CENTER);
+            header.setBackgroundColor(Color.LIGHT_GRAY);
+            header.setPadding(6f);
+            table.addCell(header);
+        }
+    }
+
+    public static void addPageIndicator(Document document, int pageNumber, int totalPages) throws DocumentException {
+        Paragraph pageIndicator = new Paragraph(
+                String.format("Page %d / %d", pageNumber, totalPages),
+                new Font(Font.HELVETICA, 9, Font.ITALIC, Color.GRAY)
+        );
+        pageIndicator.setAlignment(Element.ALIGN_RIGHT);
+        pageIndicator.setSpacingBefore(6f);
+        document.add(pageIndicator);
+    }
+
+    public static void finalizePage(
+            Document document,
+            PdfPTable table,
+            int pageNumber,
+            int totalPages) throws DocumentException {
+
+        document.add(table);
+        addPageIndicator(document, pageNumber, totalPages);
+        if (pageNumber < totalPages) {
+            document.newPage();
+        }
+    }
 
     public static Map<Long, Exercise> loadExercisesByIds(
             List<ProgramExerciseRequest> requests,
@@ -98,28 +131,6 @@ public class PdfUtils {
                 .collect(Collectors.toMap(Exercise::getId, e -> e));
     }
 
-
-    public static void addPageIndicator(Document document, int pageNumber, int totalPages) throws DocumentException {
-        Paragraph pageIndicator = new Paragraph(
-                String.format("Page %d / %d", pageNumber, totalPages),
-                new Font(Font.HELVETICA, 9, Font.ITALIC, Color.GRAY)
-        );
-        pageIndicator.setAlignment(Element.ALIGN_RIGHT);
-        pageIndicator.setSpacingBefore(6f);
-        document.add(pageIndicator);
-    }
-
-    public static void addDayHeaders(PdfPTable table, List<String> daysOfWeek) {
-        Font headerFont = new Font(Font.HELVETICA, 12, Font.BOLD);
-        for (String day : daysOfWeek) {
-            PdfPCell header = new PdfPCell(new Phrase(day, headerFont));
-            header.setHorizontalAlignment(Element.ALIGN_CENTER);
-            header.setBackgroundColor(Color.LIGHT_GRAY);
-            header.setPadding(6f);
-            table.addCell(header);
-        }
-    }
-
     public static Map<String, List<ProgramExerciseRequest>> groupExercisesByDay(
             Document document,
             ProgramRequest request) throws DocumentException {
@@ -143,6 +154,7 @@ public class PdfUtils {
 
         return exercisesByDay;
     }
+
 
 
 }

@@ -77,7 +77,6 @@ public class PdfExerciseCellFactory {
     }
 
 
-
     private static String[] formatExerciseData(ProgramExerciseRequest ex) {
         String sets = ex.getSets() != null ? ex.getSets() : "-";
         String reps = ex.getReps() != null ? ex.getReps() : "-";
