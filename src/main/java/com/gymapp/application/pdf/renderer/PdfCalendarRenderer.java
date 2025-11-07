@@ -4,6 +4,7 @@ import com.gymapp.api.dto.program.request.ProgramRequest;
 import com.gymapp.api.dto.programexercise.request.ProgramExerciseRequest;
 import com.gymapp.application.pdf.factory.PdfExerciseCellFactory;
 import com.gymapp.application.pdf.model.PdfLayoutConfig;
+import com.gymapp.application.pdf.util.PdfDataUtils;
 import com.gymapp.application.pdf.util.PdfUtils;
 import com.gymapp.domain.entity.Exercise;
 import com.lowagie.text.Document;
@@ -26,7 +27,7 @@ public class PdfCalendarRenderer {
             boolean withImages) throws DocumentException {
 
         Map<String, List<ProgramExerciseRequest>> exercisesByDay =
-                PdfUtils.groupExercisesByDay(document, request);
+                PdfDataUtils.groupExercisesByDay(document, request);
 
         if (exercisesByDay.isEmpty()) return;
 

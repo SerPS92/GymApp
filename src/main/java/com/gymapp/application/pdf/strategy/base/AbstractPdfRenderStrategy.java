@@ -1,6 +1,7 @@
 package com.gymapp.application.pdf.strategy.base;
 
 import com.gymapp.api.dto.program.request.ProgramRequest;
+import com.gymapp.application.pdf.util.PdfDataUtils;
 import com.gymapp.application.pdf.util.PdfUtils;
 import com.gymapp.domain.entity.Exercise;
 import com.gymapp.infrastructure.persistence.ExerciseJpaRepository;
@@ -25,7 +26,7 @@ public abstract class AbstractPdfRenderStrategy implements PdfRenderStrategy {
     public byte[] render(ProgramRequest request) {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Map<Long, Exercise> exerciseMap =
-                    PdfUtils.loadExercisesByIds(request.getProgramExercises(), exerciseRepository);
+                    PdfDataUtils.loadExercisesByIds(request.getProgramExercises(), exerciseRepository);
 
             Document document = PdfUtils.createDocument(out);
             PdfUtils.addHeader(document, request);
