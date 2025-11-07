@@ -1,4 +1,4 @@
-package com.gymapp.application.service.pdf.util;
+package com.gymapp.application.pdf.util;
 
 import com.gymapp.api.dto.program.request.ProgramRequest;
 import com.gymapp.api.dto.programexercise.request.ProgramExerciseRequest;
@@ -155,6 +155,19 @@ public class PdfUtils {
         return exercisesByDay;
     }
 
+    public static float[] resolveLayoutConfig(int maxRows) {
+        if (maxRows <= 5) {
+            return new float[]{70f, 6f, 10};
+        } else {
+            return new float[]{60f, 5f, 9};
+        }
+    }
 
+    public static float[] resolveLayoutConfigNoImage(int maxRows) {
+        if (maxRows <= 6) return new float[]{6f, 10};
+        if (maxRows <= 8) return new float[]{5f, 9};
+        if (maxRows <= 10) return new float[]{4.5f, 8};
+        return new float[]{3.5f, 7};
+    }
 
 }

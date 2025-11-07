@@ -1,4 +1,4 @@
-package com.gymapp.application.service.pdf.factory;
+package com.gymapp.application.pdf.factory;
 
 import com.gymapp.api.dto.programexercise.request.ProgramExerciseRequest;
 import com.gymapp.domain.entity.Exercise;
