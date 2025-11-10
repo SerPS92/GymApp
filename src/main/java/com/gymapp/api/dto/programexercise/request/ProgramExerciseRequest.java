@@ -34,7 +34,7 @@ public class ProgramExerciseRequest {
     @Schema(description = "Rest time between sets.", example = "90s")
     String restTime;
 
-    @Schema(description = "Day of the week for this exercise.", example = "Monday")
+    @Schema(description = "Day of the week for this exercise.", example = "Day 1, Day 2")
     @NotNull(message = "day cannot be null")
     String day;
 

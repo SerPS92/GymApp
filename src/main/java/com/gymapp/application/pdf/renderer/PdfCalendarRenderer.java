@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 @Component
 public class PdfCalendarRenderer {
@@ -31,7 +32,10 @@ public class PdfCalendarRenderer {
 
         if (exercisesByDay.isEmpty()) return;
 
-        List<String> allDays = List.of("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
+        List<String> allDays = IntStream.rangeClosed(1, 7)
+                .mapToObj(i -> "Day " + i)
+                .toList();
+
         List<String> daysWithExercises = allDays.stream()
                 .filter(day -> exercisesByDay.containsKey(day) && !exercisesByDay.get(day).isEmpty())
                 .toList();

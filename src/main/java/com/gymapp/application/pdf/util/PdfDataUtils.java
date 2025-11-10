@@ -4,10 +4,10 @@ import com.gymapp.api.dto.program.request.ProgramRequest;
 import com.gymapp.api.dto.programexercise.request.ProgramExerciseRequest;
 import com.gymapp.domain.entity.Exercise;
 import com.gymapp.infrastructure.persistence.ExerciseJpaRepository;
-import com.gymapp.shared.error.exception.AppException;
 import com.gymapp.shared.error.ErrorCode;
-import com.lowagie.text.*;
+import com.gymapp.shared.error.exception.AppException;
 import com.lowagie.text.Font;
+import com.lowagie.text.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 
@@ -15,6 +15,7 @@ import java.awt.*;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.gymapp.shared.error.ErrorConstants.EXERCISES_NOT_FOUND_WITH_IDS;
 
@@ -60,7 +61,9 @@ public class PdfDataUtils {
         Map<String, List<ProgramExerciseRequest>> exercisesByDay = request.getProgramExercises().stream()
                 .collect(Collectors.groupingBy(ProgramExerciseRequest::getDay));
 
-        List<String> allDays = List.of("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
+        List<String> allDays = IntStream.rangeClosed(1, 7)
+                .mapToObj(i -> "Day " + i)
+                .toList();
 
         List<String> daysWithExercises = allDays.stream()
                 .filter(day -> exercisesByDay.containsKey(day) && !exercisesByDay.get(day).isEmpty())
