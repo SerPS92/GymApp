@@ -5,7 +5,7 @@ import com.gymapp.api.dto.category.request.CategoryFilterRequest;
 import com.gymapp.api.dto.category.request.CategoryUpdateRequest;
 import com.gymapp.api.dto.category.response.CategoryResponse;
 import com.gymapp.shared.dto.PageResponseDTO;
-import com.gymapp.shared.error.BadRequestException;
+import com.gymapp.shared.error.exception.BadRequestException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;

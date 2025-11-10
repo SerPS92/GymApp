@@ -2,7 +2,7 @@ package com.gymapp.application.service.pdf;
 
 import com.gymapp.api.dto.program.request.ProgramRequest;
 import com.gymapp.application.pdf.strategy.base.PdfRenderStrategy;
-import com.gymapp.shared.error.AppException;
+import com.gymapp.shared.error.exception.AppException;
 import com.gymapp.shared.error.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,6 +1,8 @@
 package com.gymapp.shared.error;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.gymapp.shared.error.exception.AppException;
+import com.gymapp.shared.error.exception.ConflictException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;

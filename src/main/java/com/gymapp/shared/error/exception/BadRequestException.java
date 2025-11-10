@@ -1,5 +1,6 @@
-package com.gymapp.shared.error;
+package com.gymapp.shared.error.exception;
 
+import com.gymapp.shared.error.ErrorCode;
 import org.springframework.http.HttpStatus;
 
 public class BadRequestException extends AppException {

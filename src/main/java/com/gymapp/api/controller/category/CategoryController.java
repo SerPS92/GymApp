@@ -6,7 +6,7 @@ import com.gymapp.api.dto.category.request.CategoryUpdateRequest;
 import com.gymapp.api.dto.category.response.CategoryResponse;
 import com.gymapp.application.service.category.CategoryService;
 import com.gymapp.shared.dto.PageResponseDTO;
-import com.gymapp.shared.error.BadRequestException;
+import com.gymapp.shared.error.exception.BadRequestException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

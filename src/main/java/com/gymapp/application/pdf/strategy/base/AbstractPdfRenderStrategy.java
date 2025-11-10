@@ -5,7 +5,7 @@ import com.gymapp.application.pdf.util.PdfDataUtils;
 import com.gymapp.application.pdf.util.PdfUtils;
 import com.gymapp.domain.entity.Exercise;
 import com.gymapp.infrastructure.persistence.ExerciseJpaRepository;
-import com.gymapp.shared.error.AppException;
+import com.gymapp.shared.error.exception.AppException;
 import com.gymapp.shared.error.ErrorCode;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Map;
+
+import static com.gymapp.shared.error.ErrorConstants.ERROR_GENERATING_PDF_DOCUMENT;
 
 public abstract class AbstractPdfRenderStrategy implements PdfRenderStrategy {
 
@@ -40,7 +42,7 @@ public abstract class AbstractPdfRenderStrategy implements PdfRenderStrategy {
             throw new AppException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     ErrorCode.PDF_GENERATION_ERROR,
-                    "Error generating PDF", e
+                    ERROR_GENERATING_PDF_DOCUMENT, e
             );
         }
     }

@@ -1,4 +1,4 @@
-package com.gymapp.shared.error;
+package com.gymapp.shared.error.handler;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

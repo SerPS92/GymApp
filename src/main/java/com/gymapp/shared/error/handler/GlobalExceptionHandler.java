@@ -1,5 +1,8 @@
-package com.gymapp.shared.error;
+package com.gymapp.shared.error.handler;
 
+import com.gymapp.shared.error.exception.AppException;
+import com.gymapp.shared.error.exception.ConflictException;
+import com.gymapp.shared.error.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.gymapp.shared.error.GlobalExceptionHandlerConstants.*;
+import static com.gymapp.shared.error.handler.GlobalExceptionHandlerConstants.*;
 
 @RestControllerAdvice
 @Slf4j

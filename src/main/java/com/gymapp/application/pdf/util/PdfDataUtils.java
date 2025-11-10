@@ -4,7 +4,7 @@ import com.gymapp.api.dto.program.request.ProgramRequest;
 import com.gymapp.api.dto.programexercise.request.ProgramExerciseRequest;
 import com.gymapp.domain.entity.Exercise;
 import com.gymapp.infrastructure.persistence.ExerciseJpaRepository;
-import com.gymapp.shared.error.AppException;
+import com.gymapp.shared.error.exception.AppException;
 import com.gymapp.shared.error.ErrorCode;
 import com.lowagie.text.*;
 import com.lowagie.text.Font;

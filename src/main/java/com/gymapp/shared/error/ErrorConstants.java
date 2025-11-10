@@ -14,9 +14,7 @@ public class ErrorConstants {
     public static final String THE_CATEGORY_ALREADY_EXISTS = "The category already exists";
     public static final String CANNOT_COMBINE_NAME_WITH_OTHER_FILTERS = "Cannot combine 'name' with other filters";
 
-    public static final String UNEXPECTED_ERROR_GENERATING_PDF_DOCUMENT = "Unexpected error generating PDF document";
     public static final String ERROR_GENERATING_PDF_DOCUMENT = "Error generating PDF document";
-    public static final String UNSUPPORTED_PDF_FORMAT_TYPE = "Unsupported PDF format type: ";
 
     public static final String EXERCISES_NOT_FOUND_WITH_IDS = "Exercises not found with ids: ";
 }

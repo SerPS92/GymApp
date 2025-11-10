@@ -7,7 +7,7 @@ import com.gymapp.api.dto.exercise.request.ExerciseUpdateRequest;
 import com.gymapp.api.dto.exercise.response.ExerciseResponse;
 import com.gymapp.application.service.exercise.ExerciseService;
 import com.gymapp.shared.dto.PageResponseDTO;
-import com.gymapp.shared.error.BadRequestException;
+import com.gymapp.shared.error.exception.BadRequestException;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
