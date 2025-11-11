@@ -37,7 +37,10 @@ public class PdfListRenderer {
             String day = entry.getKey();
             List<ProgramExerciseRequest> exercises = entry.getValue();
 
-            PdfPTable dayTable = buildDayTable(day, exercises, exerciseMap, dayHeaderFont, exerciseFontSize);
+            String displayName = formatDayTitle(day, request);
+
+            PdfPTable dayTable = buildDayTable(displayName, exercises, exerciseMap, dayHeaderFont, exerciseFontSize);
+
             document.add(dayTable);
 
             Paragraph spacer = new Paragraph();
@@ -85,4 +88,12 @@ public class PdfListRenderer {
 
         return table;
     }
+
+    private String formatDayTitle(String day, ProgramRequest request) {
+        if (request.getDayLabels() != null && request.getDayLabels().containsKey(day)) {
+            return day + ": " + request.getDayLabels().get(day);
+        }
+        return day;
+    }
+
 }

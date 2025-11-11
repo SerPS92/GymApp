@@ -11,6 +11,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @Builder
@@ -36,6 +37,11 @@ public class ProgramRequest {
             "Each item represents a separate note line.", example = "Increase weight progressively")
     @Size(max = 10, message = "notes cannot contain more than 10 items")
     List<@Size(max = 90, message = "each note must not exceed 90 characters") String> notes;
+
+    @Schema(description = "Custom labels for each day (e.g. Day 1 → Push, Day 2 → Pull)",
+            example = "{\"Day 1\": \"Push\", \"Day 2\": \"Pull\"}")
+    Map<String, String> dayLabels;
+
 
     @Schema(description = "Desired PDF layout format.", example = "CALENDAR")
     PdfFormatType pdfFormatType;
