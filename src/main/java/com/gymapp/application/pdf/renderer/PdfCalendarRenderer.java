@@ -2,11 +2,11 @@ package com.gymapp.application.pdf.renderer;
 
 import com.gymapp.api.dto.program.request.ProgramRequest;
 import com.gymapp.api.dto.programexercise.request.ProgramExerciseRequest;
+import com.gymapp.application.pdf.dto.PdfExerciseDto;
 import com.gymapp.application.pdf.factory.PdfExerciseCellFactory;
 import com.gymapp.application.pdf.model.PdfLayoutConfig;
 import com.gymapp.application.pdf.util.PdfCalendarUtils;
 import com.gymapp.application.pdf.util.PdfDataUtils;
-import com.gymapp.domain.entity.Exercise;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.pdf.PdfPTable;
@@ -24,7 +24,7 @@ public class PdfCalendarRenderer {
     public void renderCalendar(
             Document document,
             ProgramRequest request,
-            Map<Long, Exercise> exerciseMap,
+            Map<Long, PdfExerciseDto> exerciseMap,
             boolean withImages) throws DocumentException {
 
         Map<String, List<ProgramExerciseRequest>> exercisesByDay =
@@ -52,7 +52,7 @@ public class PdfCalendarRenderer {
             Document document,
             List<String> daysWithExercises,
             Map<String, List<ProgramExerciseRequest>> exercisesByDay,
-            Map<Long, Exercise> exerciseMap,
+            Map<Long, PdfExerciseDto> exerciseMap,
             int maxRows,
             boolean withImages) throws DocumentException {
 
@@ -93,7 +93,7 @@ public class PdfCalendarRenderer {
             int row,
             List<String> daysWithExercises,
             Map<String, List<ProgramExerciseRequest>> exercisesByDay,
-            Map<Long, Exercise> exerciseMap,
+            Map<Long, PdfExerciseDto> exerciseMap,
             PdfLayoutConfig layout) {
 
         for (String day : daysWithExercises) {
@@ -102,7 +102,7 @@ public class PdfCalendarRenderer {
 
             if (exercises.size() >= row) {
                 ProgramExerciseRequest ex = exercises.get(row - 1);
-                Exercise exercise = exerciseMap.get(ex.getExerciseId());
+                PdfExerciseDto exercise = exerciseMap.get(ex.getExerciseId());
 
                 table.addCell(layout.isWithImages()
                         ? PdfExerciseCellFactory.createExerciseCell(exercise, ex, layout.getImageSize(), layout.getPadding(), layout.getFontSize())

@@ -1,9 +1,9 @@
 package com.gymapp.application.pdf.strategy.list;
 
 import com.gymapp.api.dto.program.request.ProgramRequest;
+import com.gymapp.application.pdf.dto.PdfExerciseDto;
 import com.gymapp.application.pdf.renderer.PdfListRenderer;
 import com.gymapp.application.pdf.strategy.base.AbstractPdfRenderStrategy;
-import com.gymapp.domain.entity.Exercise;
 import com.gymapp.domain.enums.PdfFormatType;
 import com.gymapp.infrastructure.persistence.ExerciseJpaRepository;
 import com.lowagie.text.Document;
@@ -31,7 +31,7 @@ public class ListRenderStrategy extends AbstractPdfRenderStrategy {
     @Override
     protected void renderContent(Document document,
                                  ProgramRequest request,
-                                 Map<Long, Exercise> exerciseMap) throws DocumentException {
+                                 Map<Long, PdfExerciseDto> exerciseMap) throws DocumentException {
         pdfListRenderer.renderList(document, request, exerciseMap);
     }
 }

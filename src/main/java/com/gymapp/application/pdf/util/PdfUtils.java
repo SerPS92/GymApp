@@ -37,7 +37,7 @@ public class PdfUtils {
                 ? request.getTitle()
                 : "Training Program";
 
-        String dateText = String.format("From %s to %s", request.getStartDate(), request.getEndDate());
+        String dateText = String.format("%s - %s", request.getStartDate(), request.getEndDate());
 
         PdfPTable headerTable = new PdfPTable(2);
         headerTable.setWidthPercentage(100);
@@ -69,7 +69,7 @@ public class PdfUtils {
                 ? request.getTitle()
                 : "Training Program";
 
-        String dateText = String.format("From %s to %s", request.getStartDate(), request.getEndDate());
+        String dateText = String.format("%s - %s", request.getStartDate(), request.getEndDate());
 
         PdfPTable headerTable = new PdfPTable(2);
         headerTable.setWidthPercentage(100);

@@ -1,7 +1,7 @@
 package com.gymapp.application.pdf.factory;
 
 import com.gymapp.api.dto.programexercise.request.ProgramExerciseRequest;
-import com.gymapp.domain.entity.Exercise;
+import com.gymapp.application.pdf.dto.PdfExerciseDto;
 import com.lowagie.text.Font;
 import com.lowagie.text.Image;
 import com.lowagie.text.*;
@@ -16,7 +16,7 @@ public class PdfExerciseCellFactory {
     private PdfExerciseCellFactory() {}
 
     public static PdfPCell createExerciseCell(
-            Exercise exercise,
+            PdfExerciseDto exercise,
             ProgramExerciseRequest ex,
             float imageSize,
             float padding,
@@ -53,7 +53,7 @@ public class PdfExerciseCellFactory {
 
 
     public static PdfPCell createTextOnlyCell(
-            Exercise exercise,
+            PdfExerciseDto exercise,
             ProgramExerciseRequest ex,
             float padding,
             int fontSize) {

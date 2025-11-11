@@ -2,6 +2,8 @@ package com.gymapp.application.pdf.util;
 
 import com.gymapp.api.dto.program.request.ProgramRequest;
 import com.gymapp.api.dto.programexercise.request.ProgramExerciseRequest;
+import com.gymapp.application.pdf.dto.PdfExerciseDto;
+import com.gymapp.application.pdf.mapper.PdfExerciseMapper;
 import com.gymapp.domain.entity.Exercise;
 import com.gymapp.infrastructure.persistence.ExerciseJpaRepository;
 import com.gymapp.shared.error.ErrorCode;
@@ -24,7 +26,7 @@ public class PdfDataUtils {
 
     private PdfDataUtils(){}
 
-    public static Map<Long, Exercise> loadExercisesByIds(
+    public static Map<Long, PdfExerciseDto> loadExercisesByIds(
             List<ProgramExerciseRequest> requests,
             ExerciseJpaRepository exerciseRepository) {
 
@@ -51,7 +53,8 @@ public class PdfDataUtils {
         log.info("Found {} exercises", exercises.size());
 
         return exercises.stream()
-                .collect(Collectors.toMap(Exercise::getId, e -> e));
+                .map(PdfExerciseMapper.INSTANCE::toDto)
+                .collect(Collectors.toMap(PdfExerciseDto::getId, e -> e));
     }
 
     public static Map<String, List<ProgramExerciseRequest>> groupExercisesByDay(

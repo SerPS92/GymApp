@@ -1,9 +1,9 @@
 package com.gymapp.application.pdf.strategy.base;
 
 import com.gymapp.api.dto.program.request.ProgramRequest;
+import com.gymapp.application.pdf.dto.PdfExerciseDto;
 import com.gymapp.application.pdf.util.PdfDataUtils;
 import com.gymapp.application.pdf.util.PdfUtils;
-import com.gymapp.domain.entity.Exercise;
 import com.gymapp.domain.enums.PdfFormatType;
 import com.gymapp.infrastructure.persistence.ExerciseJpaRepository;
 import com.gymapp.shared.error.ErrorCode;
@@ -28,7 +28,7 @@ public abstract class AbstractPdfRenderStrategy implements PdfRenderStrategy {
     @Override
     public byte[] render(ProgramRequest request) {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            Map<Long, Exercise> exerciseMap =
+            Map<Long, PdfExerciseDto> exerciseMap =
                     PdfDataUtils.loadExercisesByIds(request.getProgramExercises(), exerciseRepository);
 
             Document document = PdfUtils.createDocument(out, request.getPdfFormatType());
@@ -56,6 +56,6 @@ public abstract class AbstractPdfRenderStrategy implements PdfRenderStrategy {
     protected abstract void renderContent(
             Document document,
             ProgramRequest request,
-            Map<Long, Exercise> exerciseMap
+            Map<Long, PdfExerciseDto> exerciseMap
     ) throws DocumentException;
 }

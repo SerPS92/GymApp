@@ -2,9 +2,9 @@ package com.gymapp.application.pdf.renderer;
 
 import com.gymapp.api.dto.program.request.ProgramRequest;
 import com.gymapp.api.dto.programexercise.request.ProgramExerciseRequest;
+import com.gymapp.application.pdf.dto.PdfExerciseDto;
 import com.gymapp.application.pdf.factory.PdfExerciseBlockFactory;
 import com.gymapp.application.pdf.util.PdfDataUtils;
-import com.gymapp.domain.entity.Exercise;
 import com.lowagie.text.Font;
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.*;
@@ -23,7 +23,7 @@ public class PdfListRenderer {
 
     public void renderList(Document document,
                            ProgramRequest request,
-                           Map<Long, Exercise> exerciseMap) throws DocumentException {
+                           Map<Long, PdfExerciseDto> exerciseMap) throws DocumentException {
 
         Map<String, List<ProgramExerciseRequest>> exercisesByDay =
                 PdfDataUtils.groupExercisesByDay(document, request);
@@ -48,7 +48,7 @@ public class PdfListRenderer {
 
     private PdfPTable buildDayTable(String day,
                                     List<ProgramExerciseRequest> exercises,
-                                    Map<Long, Exercise> exerciseMap,
+                                    Map<Long, PdfExerciseDto> exerciseMap,
                                     Font dayHeaderFont,
                                     int exerciseFontSize) throws DocumentException {
 
@@ -67,7 +67,7 @@ public class PdfListRenderer {
 
         int exerciseCounter = 0;
         for (ProgramExerciseRequest ex : exercises) {
-            Exercise exercise = exerciseMap.get(ex.getExerciseId());
+            PdfExerciseDto exercise = exerciseMap.get(ex.getExerciseId());
             if (exercise == null) continue;
 
             Paragraph block = PdfExerciseBlockFactory.createExerciseBlock(exercise, ex, exerciseFontSize);
