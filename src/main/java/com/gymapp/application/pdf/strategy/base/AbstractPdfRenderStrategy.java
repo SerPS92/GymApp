@@ -4,9 +4,10 @@ import com.gymapp.api.dto.program.request.ProgramRequest;
 import com.gymapp.application.pdf.util.PdfDataUtils;
 import com.gymapp.application.pdf.util.PdfUtils;
 import com.gymapp.domain.entity.Exercise;
+import com.gymapp.domain.enums.PdfFormatType;
 import com.gymapp.infrastructure.persistence.ExerciseJpaRepository;
-import com.gymapp.shared.error.exception.AppException;
 import com.gymapp.shared.error.ErrorCode;
+import com.gymapp.shared.error.exception.AppException;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import org.springframework.http.HttpStatus;
@@ -30,8 +31,13 @@ public abstract class AbstractPdfRenderStrategy implements PdfRenderStrategy {
             Map<Long, Exercise> exerciseMap =
                     PdfDataUtils.loadExercisesByIds(request.getProgramExercises(), exerciseRepository);
 
-            Document document = PdfUtils.createDocument(out);
-            PdfUtils.addHeader(document, request);
+            Document document = PdfUtils.createDocument(out, request.getPdfFormatType());
+
+            if (request.getPdfFormatType() == PdfFormatType.LIST) {
+                PdfUtils.addListHeader(document, request);
+            } else {
+                PdfUtils.addHeader(document, request);
+            }
 
             renderContent(document, request, exerciseMap);
 

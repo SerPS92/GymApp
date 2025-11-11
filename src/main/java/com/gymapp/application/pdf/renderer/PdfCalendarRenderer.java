@@ -4,8 +4,8 @@ import com.gymapp.api.dto.program.request.ProgramRequest;
 import com.gymapp.api.dto.programexercise.request.ProgramExerciseRequest;
 import com.gymapp.application.pdf.factory.PdfExerciseCellFactory;
 import com.gymapp.application.pdf.model.PdfLayoutConfig;
+import com.gymapp.application.pdf.util.PdfCalendarUtils;
 import com.gymapp.application.pdf.util.PdfDataUtils;
-import com.gymapp.application.pdf.util.PdfUtils;
 import com.gymapp.domain.entity.Exercise;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
@@ -56,7 +56,7 @@ public class PdfCalendarRenderer {
             int maxRows,
             boolean withImages) throws DocumentException {
 
-        float[] config = withImages ? PdfUtils.resolveLayoutConfig(maxRows) : PdfUtils.resolveLayoutConfigNoImage(maxRows);
+        float[] config = withImages ? PdfCalendarUtils.resolveLayoutConfig(maxRows) : PdfCalendarUtils.resolveLayoutConfigNoImage(maxRows);
         PdfLayoutConfig layout = withImages
                 ? new PdfLayoutConfig(true, config[0], config[1], (int) config[2])
                 : new PdfLayoutConfig(false, 0, config[0], (int) config[1]);
@@ -66,7 +66,7 @@ public class PdfCalendarRenderer {
         int totalPages = (int) Math.ceil((double) maxRows / rowsPerPage);
 
         PdfPTable currentTable = createBaseTable(daysWithExercises.size());
-        PdfUtils.addDayHeaders(currentTable, daysWithExercises);
+        PdfCalendarUtils.addDayHeaders(currentTable, daysWithExercises);
 
         int currentRowCount = 0;
 
@@ -75,16 +75,16 @@ public class PdfCalendarRenderer {
             currentRowCount++;
 
             if (currentRowCount == rowsPerPage && row < maxRows) {
-                PdfUtils.finalizePage(document, currentTable, pageNumber, totalPages);
+                PdfCalendarUtils.finalizePage(document, currentTable, pageNumber, totalPages);
                 pageNumber++;
                 currentTable = createBaseTable(daysWithExercises.size());
-                PdfUtils.addDayHeaders(currentTable, daysWithExercises);
+                PdfCalendarUtils.addDayHeaders(currentTable, daysWithExercises);
                 currentRowCount = 0;
             }
         }
 
         if (currentRowCount > 0) {
-            PdfUtils.finalizePage(document, currentTable, pageNumber, totalPages);
+            PdfCalendarUtils.finalizePage(document, currentTable, pageNumber, totalPages);
         }
     }
 
