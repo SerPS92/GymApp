@@ -2,13 +2,17 @@ package com.gymapp.application.pdf.util;
 
 import com.gymapp.api.dto.program.request.ProgramRequest;
 import com.gymapp.domain.enums.PdfFormatType;
+import com.lowagie.text.Font;
+import com.lowagie.text.Rectangle;
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.awt.*;
 import java.io.ByteArrayOutputStream;
+import java.util.List;
 
 @Slf4j
 public class PdfUtils {
@@ -105,6 +109,39 @@ public class PdfUtils {
         spacer.setSpacingAfter(6f);
         document.add(spacer);
     }
+
+    public static void addProgramNotes(Document document, List<String> notes) throws DocumentException {
+        if (notes == null || notes.isEmpty()) return;
+
+        Font notesTitleFont = new Font(Font.HELVETICA, 13, Font.BOLD, Color.DARK_GRAY);
+        Font notesTextFont = new Font(Font.HELVETICA, 11, Font.NORMAL, Color.BLACK);
+
+        PdfPTable notesTable = new PdfPTable(1);
+        notesTable.setWidthPercentage(100);
+        notesTable.setKeepTogether(true);
+        notesTable.getDefaultCell().setBorder(Rectangle.NO_BORDER);
+
+        PdfPCell titleCell = new PdfPCell(new Phrase("Notes:", notesTitleFont));
+        titleCell.setBorder(Rectangle.NO_BORDER);
+        titleCell.setPaddingTop(20f);
+        titleCell.setPaddingBottom(6f);
+        notesTable.addCell(titleCell);
+
+        for (String note : notes) {
+            if (note != null && !note.isBlank()) {
+                Paragraph noteLine = new Paragraph(note.trim(), notesTextFont);
+                PdfPCell noteCell = new PdfPCell();
+                noteCell.addElement(noteLine);
+                noteCell.setBorder(Rectangle.NO_BORDER);
+                noteCell.setPaddingBottom(2f);
+                notesTable.addCell(noteCell);
+            }
+        }
+
+        document.add(notesTable);
+    }
+
+
 
 
 

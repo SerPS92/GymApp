@@ -40,7 +40,7 @@ public abstract class AbstractPdfRenderStrategy implements PdfRenderStrategy {
             }
 
             renderContent(document, request, exerciseMap);
-
+            PdfUtils.addProgramNotes(document, request.getNotes());
             document.close();
             return out.toByteArray();
 

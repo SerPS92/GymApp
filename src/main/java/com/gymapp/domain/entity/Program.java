@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -28,6 +29,11 @@ public class Program {
 
     @Column(length = 100)
     String title;
+
+    @ElementCollection
+    @CollectionTable(name = "program_notes", joinColumns = @JoinColumn(name = "program_id"))
+    @Column(name = "note")
+    List<String> notes = new ArrayList<>();
 
     @OneToMany(mappedBy = "program", cascade = CascadeType.ALL, orphanRemoval = true)
     List<ProgramExercise> programExercises;

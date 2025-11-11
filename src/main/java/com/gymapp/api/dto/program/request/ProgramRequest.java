@@ -28,10 +28,15 @@ public class ProgramRequest {
     LocalDate endDate;
 
     @Schema(description = "Custom title of the training program.", example = "Upper/Lower Routine 3 Days")
-    private String title;
+    String title;
+
+
+    @Schema(description = "Additional notes or recommendations displayed at the end of the PDF. " +
+            "Each item represents a separate note line.", example = "Increase weight progressively")
+    List<String> notes;
 
     @Schema(description = "Desired PDF layout format.", example = "CALENDAR")
-    private PdfFormatType pdfFormatType;
+    PdfFormatType pdfFormatType;
 
     @Valid
     @Schema(description = "List of exercises included in the program.")
