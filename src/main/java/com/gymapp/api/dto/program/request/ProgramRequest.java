@@ -5,6 +5,7 @@ import com.gymapp.domain.enums.PdfFormatType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -28,12 +29,13 @@ public class ProgramRequest {
     LocalDate endDate;
 
     @Schema(description = "Custom title of the training program.", example = "Upper/Lower Routine 3 Days")
+    @Size(max = 35, message = "title must not exceed 35 characters")
     String title;
-
 
     @Schema(description = "Additional notes or recommendations displayed at the end of the PDF. " +
             "Each item represents a separate note line.", example = "Increase weight progressively")
-    List<String> notes;
+    @Size(max = 10, message = "notes cannot contain more than 10 items")
+    List<@Size(max = 90, message = "each note must not exceed 90 characters") String> notes;
 
     @Schema(description = "Desired PDF layout format.", example = "CALENDAR")
     PdfFormatType pdfFormatType;

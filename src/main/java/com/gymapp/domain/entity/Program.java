@@ -27,12 +27,12 @@ public class Program {
     LocalDate startDate;
     LocalDate endDate;
 
-    @Column(length = 100)
+    @Column(length = 35)
     String title;
 
     @ElementCollection
     @CollectionTable(name = "program_notes", joinColumns = @JoinColumn(name = "program_id"))
-    @Column(name = "note")
+    @Column(name = "note", length = 90)
     List<String> notes = new ArrayList<>();
 
     @OneToMany(mappedBy = "program", cascade = CascadeType.ALL, orphanRemoval = true)
