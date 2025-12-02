@@ -10,7 +10,26 @@ INSERT INTO categories (id, name) VALUES
   (9, 'Home Workout'),
   (10, 'Stretching'),
   (11, 'Mobility'),
-  (12, 'HIIT');
+  (12, 'HIIT'),
+  (13, 'Powerlifting'),
+  (14, 'Bodybuilding'),
+  (15, 'Calisthenics'),
+  (16, 'CrossFit'),
+  (17, 'Glutes'),
+  (18, 'Quads'),
+  (19, 'Hamstrings'),
+  (20, 'Calves'),
+  (21, 'Lower Back'),
+  (22, 'Neck'),
+  (23, 'Forearms'),
+  (24, 'Strength'),
+  (25, 'Endurance'),
+  (26, 'Warm-Up'),
+  (27, 'Rehabilitation'),
+  (28, 'Explosive Training'),
+  (29, 'Plyometrics'),
+  (30, 'Balance & Stability');
+
 
 
 INSERT INTO exercises (id, name, description, difficulty, image_url) VALUES
