@@ -43,6 +43,9 @@ public class ProgramExercise {
     @Column(length = 8)
     String intensity;
 
+    @Column(length = 8)
+    String tempo;
+
     @NotNull
     @Column(nullable = false)
     @Min(1)

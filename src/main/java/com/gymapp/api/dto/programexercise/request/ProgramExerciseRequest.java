@@ -47,6 +47,10 @@ public class ProgramExerciseRequest {
             "Can represent absolute or relative effort (e.g., weight, %1RM, RPE, or RM).", example = "75% 1RM")
     String intensity;
 
+    @Size(max = 8, message = "tempo must not exceed 8 characters")
+    @Schema(description = "Movement tempo for the exercise (e.g., 3-1-2-0).", example = "3-1-2-0")
+    String tempo;
+
     @Schema(description = "Order position within the day (1 = top).", example = "2")
     @NotNull(message = "position must not be null")
     @Min(value = 1, message = "position must be at least 1")
