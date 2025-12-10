@@ -35,11 +35,12 @@ public class ProgramRequest {
 
     @Schema(description = "Additional notes or recommendations displayed at the end of the PDF. " +
             "Each item represents a separate note line.", example = "Increase weight progressively")
-    @Size(max = 10, message = "notes cannot contain more than 10 items")
-    List<@Size(max = 90, message = "each note must not exceed 90 characters") String> notes;
+    @Size(max = 15, message = "notes cannot contain more than 15 items")
+    List<@Size(max = 80, message = "each note must not exceed 80 characters") String> notes;
 
     @Schema(description = "Custom labels for each day (e.g. Day 1 → Push, Day 2 → Pull)",
             example = "{\"Day 1\": \"Push\", \"Day 2\": \"Pull\"}")
+    @Size(max = 30)
     Map<String, String> dayLabels;
 
 
