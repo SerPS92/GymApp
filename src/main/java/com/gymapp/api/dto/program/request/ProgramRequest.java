@@ -30,6 +30,10 @@ public class ProgramRequest {
     @Size(max = 35, message = "title must not exceed 35 characters")
     String title;
 
+    @Schema(description = "Name of the client for whom the training program is created.", example = "John Doe")
+    @Size(max = 60, message = "clientName must not exceed 60 characters")
+    String clientName;
+
     @Schema(description = "Additional notes or recommendations displayed at the end of the PDF. " +
             "Each item represents a separate note line.", example = "Increase weight progressively")
     @Size(max = 15, message = "notes cannot contain more than 15 items")

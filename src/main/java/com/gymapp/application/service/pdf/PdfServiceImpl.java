@@ -26,7 +26,6 @@ import static com.gymapp.application.pdf.util.PdfConstants.RUTINA_DE_ENTRENAMIEN
 @Slf4j
 public class PdfServiceImpl implements PdfService{
 
-
     private final ExerciseJpaRepository exerciseJpaRepository;
     private final HtmlToPdfGenerator pdfGenerator;
 
@@ -39,6 +38,7 @@ public class PdfServiceImpl implements PdfService{
     private PdfProgramViewModel createPdfProgramViewModel(ProgramRequest request){
         return PdfProgramViewModel.builder()
                 .title(normalizeTitle(request.getTitle()))
+                .clientName(normalizeName(request.getClientName()))
                 .startDate(getDateText(request.getStartDate()))
                 .endDate(getDateText(request.getEndDate()))
                 .format(request.getPdfFormatType())
@@ -86,6 +86,10 @@ public class PdfServiceImpl implements PdfService{
         return (title == null || title.isBlank())
                 ? RUTINA_DE_ENTRENAMIENTO
                 : title;
+    }
+
+    private String normalizeName(String name){
+        return (name == null || name.isBlank()) ? "" : name;
     }
 
 }

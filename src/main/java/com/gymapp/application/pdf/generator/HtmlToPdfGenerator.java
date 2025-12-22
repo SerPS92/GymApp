@@ -22,17 +22,7 @@ public class HtmlToPdfGenerator {
 
     public byte[] generate(PdfProgramViewModel viewModel) {
 
-        Context context = new Context();
-        context.setVariables(
-                Map.of(
-                        "title", viewModel.getTitle(),
-                        "startDate", viewModel.getStartDate(),
-                        "endDate", viewModel.getEndDate(),
-                        "dayLabels", viewModel.getDayLabels(),
-                        "notes", viewModel.getNotes(),
-                        "exercisesByDay", viewModel.getExercisesByDay()
-                )
-        );
+        Context context = getContext(viewModel);
 
         String html = templateEngine.process(
                 "pdf/templates/program",
@@ -54,5 +44,21 @@ public class HtmlToPdfGenerator {
                     ErrorConstants.ERROR_GENERATING_PDF_DOCUMENT,
                     e);
         }
+    }
+
+    private Context getContext(PdfProgramViewModel viewModel){
+        Context context = new Context();
+        context.setVariables(
+                Map.of(
+                        "title", viewModel.getTitle(),
+                        "clientName", viewModel.getClientName(),
+                        "startDate", viewModel.getStartDate(),
+                        "endDate", viewModel.getEndDate(),
+                        "dayLabels", viewModel.getDayLabels(),
+                        "notes", viewModel.getNotes(),
+                        "exercisesByDay", viewModel.getExercisesByDay()
+                )
+        );
+        return context;
     }
 }

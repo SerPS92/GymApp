@@ -11,7 +11,13 @@
         }
 
         h1 {
-            margin-bottom: 4px;
+            margin-bottom: 2px;
+        }
+
+        .client-name {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 6px;
         }
 
         .dates {
@@ -37,10 +43,17 @@
 
 <h1 th:text="${title}">Program title</h1>
 
-<div class="dates">
-    <span th:text="${startDate}"></span>
-    –
-    <span th:text="${endDate}"></span>
+<div class="client-name"
+     th:if="${clientName != null and clientName.trim() != ''}"
+     th:text="${clientName}">
+    Client Name
+</div>
+
+<div class="dates"
+     th:if="${startDateText != null or endDateText != null}">
+    <span th:text="${startDateText}"></span>
+    <span th:if="${startDateText != '' and endDateText != ''}"> – </span>
+    <span th:text="${endDateText}"></span>
 </div>
 
 <div th:each="dayEntry : ${exercisesByDay}">
@@ -53,14 +66,14 @@
             <strong th:text="${exercise.name}">Exercise</strong>
             <span th:text="${exercise.sets}">4</span>x
             <span th:text="${exercise.reps}">10</span>
-            <span th:if="${exercise.restTime != null}">
+            <span th:if="${exercise.restTime != null and exercise.restTime != ''}">
                 (<span th:text="${exercise.restTime}">90s</span>)
             </span>
         </div>
     </div>
 </div>
 
-<div th:if="${notes != null}">
+<div th:if="${notes != null and !notes.isEmpty()}">
     <h3>Notes</h3>
     <ul>
         <li th:each="note : ${notes}" th:text="${note}"></li>

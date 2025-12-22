@@ -16,6 +16,7 @@ import java.util.Map;
 public class PdfProgramViewModel {
 
     String title;
+    String clientName;
     String startDate;
     String endDate;
 
