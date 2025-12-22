@@ -12,34 +12,38 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static com.gymapp.application.pdf.util.PdfConstants.RUTINA_DE_ENTRENAMIENTO;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class PdfServiceImpl implements PdfService{
 
+
     private final ExerciseJpaRepository exerciseJpaRepository;
     private final HtmlToPdfGenerator pdfGenerator;
 
     @Override
     public byte[] generateProgramPdf(ProgramRequest request) {
-
         PdfProgramViewModel pdfProgramViewModel = createPdfProgramViewModel(request);
         return pdfGenerator.generate(pdfProgramViewModel);
     }
 
     private PdfProgramViewModel createPdfProgramViewModel(ProgramRequest request){
         return PdfProgramViewModel.builder()
-                .title(request.getTitle())
-                .startDate(request.getStartDate())
-                .endDate(request.getEndDate())
+                .title(normalizeTitle(request.getTitle()))
+                .startDate(getDateText(request.getStartDate()))
+                .endDate(getDateText(request.getEndDate()))
                 .format(request.getPdfFormatType())
-                .dayLabels(request.getDayLabels())
-                .notes(request.getNotes())
+                .dayLabels(Objects.requireNonNullElse(request.getDayLabels(), Map.of()))
+                .notes(Objects.requireNonNullElse(request.getNotes(), null))
                 .exercisesByDay(getExercisesByDay(request))
                 .build();
     }
@@ -73,4 +77,15 @@ public class PdfServiceImpl implements PdfService{
                                 .toList()
                 ));
     }
+
+    private String getDateText(LocalDate localDate){
+        return localDate != null ? localDate.toString() : "";
+    }
+
+    private String normalizeTitle(String title) {
+        return (title == null || title.isBlank())
+                ? RUTINA_DE_ENTRENAMIENTO
+                : title;
+    }
+
 }

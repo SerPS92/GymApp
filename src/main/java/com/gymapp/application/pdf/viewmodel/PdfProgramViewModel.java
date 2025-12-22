@@ -4,7 +4,6 @@ import com.gymapp.domain.enums.PdfFormatType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -17,8 +16,8 @@ import java.util.Map;
 public class PdfProgramViewModel {
 
     String title;
-    LocalDate startDate;
-    LocalDate endDate;
+    String startDate;
+    String endDate;
 
     PdfFormatType format;
 
