@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8"/>
+    <title th:text="${title}">Program</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+        }
+
+        h1 {
+            margin-bottom: 4px;
+        }
+
+        .dates {
+            color: #666;
+            margin-bottom: 16px;
+        }
+
+        .day {
+            margin-top: 24px;
+        }
+
+        .exercise {
+            margin-left: 12px;
+            margin-bottom: 8px;
+        }
+
+        .exercise span {
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<h1 th:text="${title}">Program title</h1>
+
+<div class="dates">
+    <span th:text="${startDate}"></span>
+    –
+    <span th:text="${endDate}"></span>
+</div>
+
+<div th:each="dayEntry : ${exercisesByDay}">
+    <div class="day">
+        <h2>
+            <span th:text="${dayLabels[dayEntry.key] ?: dayEntry.key}"></span>
+        </h2>
+
+        <div th:each="exercise : ${dayEntry.value}" class="exercise">
+            <strong th:text="${exercise.name}">Exercise</strong>
+            <span th:text="${exercise.sets}">4</span>x
+            <span th:text="${exercise.reps}">10</span>
+            <span th:if="${exercise.restTime != null}">
+                (<span th:text="${exercise.restTime}">90s</span>)
+            </span>
+        </div>
+    </div>
+</div>
+
+<div th:if="${notes != null}">
+    <h3>Notes</h3>
+    <ul>
+        <li th:each="note : ${notes}" th:text="${note}"></li>
+    </ul>
+</div>
+
+</body>
+</html>
