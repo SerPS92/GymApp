@@ -1,10 +1,14 @@
 package com.gymapp.api.controller.program;
 
 import com.gymapp.api.dto.program.request.ProgramRequest;
+import com.gymapp.application.pdf.util.PdfFileNameGenerator;
 import com.gymapp.application.service.pdf.PdfService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -44,10 +48,16 @@ public class ProgramController implements ProgramApi{
     @Override
     public ResponseEntity<byte[]> generateProgramPdf(@Valid ProgramRequest request) {
         byte[] pdfBytes = pdfService.generateProgramPdf(request);
-        log.info("Pdf generated");
+        String fileName = PdfFileNameGenerator.generateFileName(request);
+        log.info("Pdf generated: {}", fileName);
         return ResponseEntity.ok()
-                .header("Content-Disposition", "attachment; filename=program.pdf")
-                .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        ContentDisposition.attachment()
+                                .filename(fileName)
+                                .build()
+                                .toString())
+                .contentType(MediaType.APPLICATION_PDF)
                 .body(pdfBytes);
+
     }
 }
