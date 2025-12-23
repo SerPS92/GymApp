@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -78,8 +79,10 @@ public class PdfServiceImpl implements PdfService{
                 ));
     }
 
-    private String getDateText(LocalDate localDate){
-        return localDate != null ? localDate.toString() : "";
+    private String getDateText(LocalDate localDate) {
+        return localDate != null
+                ? localDate.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+                : "";
     }
 
     private String normalizeTitle(String title) {

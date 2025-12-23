@@ -50,10 +50,10 @@
 </div>
 
 <div class="dates"
-     th:if="${startDateText != null or endDateText != null}">
-    <span th:text="${startDateText}"></span>
-    <span th:if="${startDateText != '' and endDateText != ''}"> – </span>
-    <span th:text="${endDateText}"></span>
+     th:if="${startDate != '' or endDate != ''}">
+    <span th:text="${startDate}"></span>
+    <span th:if="${startDate != '' and endDate != ''}"> – </span>
+    <span th:text="${endDate}"></span>
 </div>
 
 <div th:each="dayEntry : ${exercisesByDay}">
