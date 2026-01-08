@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "exercises", uniqueConstraints = @UniqueConstraint(columnNames = {"name", "muscle_group"}))
+@Table(name = "exercises", uniqueConstraints = @UniqueConstraint(columnNames = {"name"}))
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
