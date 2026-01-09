@@ -1,6 +1,5 @@
 package com.gymapp.domain.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -32,6 +31,9 @@ public class Program {
     @Column(length = 35)
     String title;
 
+    @Column(length = 60)
+    String clientName;
+
     @ElementCollection
     @CollectionTable(name = "program_notes", joinColumns = @JoinColumn(name = "program_id"))
     @Column(name = "note", length = 80)
@@ -46,9 +48,9 @@ public class Program {
     @MapKeyColumn(name = "day_key", length = 30)
     Map<String, String> dayLabels = new HashMap<>();
 
-    @ManyToOne
-    @JsonBackReference
-    Client client;
+//    @ManyToOne
+//    @JsonBackReference
+//    Client client;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "owner_id", nullable = false)

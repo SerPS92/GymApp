@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 public class ErrorConstants {
 
     public static final String THE_EXERCISE_WITH_ID_D_DOES_NOT_EXIST = "The exercise with id %d does not exist";
+    public static final String THE_PROGRAM_WITH_ID_D_DOES_NOT_EXIST = "The program with id %d does not exist";
     public static final String THE_CATEGORY_WITH_ID_D_DOES_NOT_EXIST = "The category with id %d does not exist";
     public static final String CANNOT_DELETE_THE_EXERCISE_IS_REFERENCED = "Cannot delete: the exercise is referenced.";
     public static final String CANNOT_DELETE_THE_CATEGORY_IS_REFERENCED = "Cannot delete: the category is referenced.";

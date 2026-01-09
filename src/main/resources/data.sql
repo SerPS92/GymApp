@@ -1,3 +1,7 @@
+INSERT INTO users (id, name, email, password, role, created_at)
+VALUES (1, 'Admin', 'admin@gymapp.com', 'dummy', 'ADMIN', CURRENT_DATE);
+
+
 INSERT INTO categories (id, name) VALUES
   (1, 'Pecho'),
   (2, 'Espalda'),
@@ -105,5 +109,85 @@ INSERT INTO exercise_categories (exercise_id, category_id) VALUES
   (37, 2), (37, 3), (37, 8),             -- Kettlebell swing
   (38, 10), (38, 11);                    -- Yoga
 
+
+INSERT INTO programs (
+    id,
+    start_date,
+    end_date,
+    title,
+    client_name,
+    owner_id
+) VALUES (
+    1,
+    '2026-01-07',
+    '2026-01-08',
+    'Rutina de fuerza',
+    'Sergio',
+    1
+);
+
+INSERT INTO program_notes (program_id, note) VALUES
+(1, 'Notas de prueba1'),
+(1, 'Notas de prueba1'),
+(1, 'Notas de prueba1'),
+(1, 'Notas de prueba1'),
+(1, 'Notas de prueba1'),
+(1, 'Notas de prueba1');
+
+INSERT INTO program_day_labels (program_id, day_key, label) VALUES
+(1, 'Day 1', 'Torso'),
+(1, 'Day 2', 'Pierna'),
+(1, 'Day 3', 'Torso'),
+(1, 'Day 4', 'Pierna'),
+(1, 'Day 5', 'Abdominales');
+
+INSERT INTO program_exercises (
+    program_id,
+    exercise_id,
+    sets,
+    reps,
+    rest_time,
+    workout_day,
+    notes,
+    intensity,
+    tempo,
+    position
+) VALUES
+-- Day 1 (Torso)
+(1, 1,  '3', '10-12', '90', 'Day 1', 'Dropset', '1RM', '3-1-1-0', 1),  -- Press banca
+(1, 3,  '3', '10-12', '60', 'Day 1', 'Dropset', '1RM', '3-1-1-0', 2),  -- Aperturas
+(1, 3,  '3', '10-12', '90', 'Day 1', 'Dropset', '1RM', '3-1-1-0', 3),
+(1, 8,  '3', '10-12', '90', 'Day 1', 'Dropset', '1RM', '3-1-1-0', 4),  -- Jalón
+(1, 10, '3', '10-12', '90', 'Day 1', 'Dropset', '1RM', '3-1-1-0', 5),  -- Elevaciones laterales
+(1, 6,  '3', '10-12', '90', 'Day 1', 'Dropset', '1RM', '3-1-1-0', 6),  -- Remo barra
+
+-- Day 2 (Pierna)
+(1, 24, '3', '10-12', '90', 'Day 2', 'Dropset', '1RM', '3-1-1-0', 1),  -- Sentadilla
+(1, 25, '3', '10-12', '90', 'Day 2', 'Dropset', '1RM', '3-1-1-0', 2),  -- Zancadas
+(1, 26, '3', '10-12', '90', 'Day 2', 'Dropset', '1RM', '3-1-1-0', 3),  -- Prensa
+(1, 27, '3', '10-12', '90', 'Day 2', 'Dropset', '1RM', '3-1-1-0', 4),  -- PM rumano
+(1, 37, '3', '10-12', '90', 'Day 2', 'Dropset', '1RM', '3-1-1-0', 5),  -- Kettlebell swing
+(1, 11, '3', '10-12', '90', 'Day 2', 'Dropset', '1RM', '3-1-1-0', 6),  -- Face pull
+
+-- Day 3 (Torso)
+(1, 1,  '3', '10-12', '60', 'Day 3', 'Dropset', 'Max', '3-1-1-0', 1),
+(1, 2,  '3', '10-12', '60', 'Day 3', 'Dropset', 'Max', '3-1-1-0', 2),
+(1, 3,  '3', '10-12', '60', 'Day 3', 'Dropset', 'Max', '3-1-1-0', 3),
+(1, 6,  '3', '10-12', '60', 'Day 3', 'Dropset', 'Max', '3-1-1-0', 4),
+(1, 7,  '3', '10-12', '60', 'Day 3', 'Dropset', 'Max', '3-1-1-0', 5),
+
+-- Day 4 (Pierna)
+(1, 24, '3', '10-12', '60', 'Day 4', 'Dropset', '1RM', '3-1-1-0', 1),
+(1, 26, '3', '10-12', NULL, 'Day 4', 'Dropset', '1RM', '3-1-1-0', 2),
+(1, 26, '3', '10-12', NULL, 'Day 4', 'Dropset', '1RM', '3-1-1-0', 3),
+(1, 37, '3', '10-12', '60', 'Day 4', 'Dropset', '1RM', '3-1-1-0', 4),
+
+-- Day 5 (Abdominales)
+(1, 18, '3', '12-15', '90', 'Day 5', 'Dropset', '1RM', '3-1-1-0', 1),
+(1, 19, '3', '12-15', '90', 'Day 5', 'Dropset', '1RM', '3-1-1-0', 2),
+(1, 36, '3', '12-15', '90', 'Day 5', '',        '1RM', '3-1-1-0', 3);
+
+
+ALTER TABLE programs ALTER COLUMN id RESTART WITH 10;
 ALTER TABLE exercises ALTER COLUMN id RESTART WITH 100;
 ALTER TABLE categories ALTER COLUMN id RESTART WITH 100;

@@ -1,13 +1,24 @@
 package com.gymapp.api.controller.program;
 
+import com.gymapp.api.dto.program.request.ProgramFilterRequest;
 import com.gymapp.api.dto.program.request.ProgramRequest;
+import com.gymapp.api.dto.program.response.ProgramResponse;
+import com.gymapp.shared.dto.PageResponseDTO;
+import com.gymapp.shared.error.exception.BadRequestException;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,30 +26,81 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Programs")
 public interface ProgramApi {
 
-    @Operation(summary = "Get all programs (future implementation)")
-    @ApiResponse(responseCode = "200", description = "Programs list (not yet implemented)")
+    @Operation(summary = "Get programs (paginated & filtered)")
+    @ApiResponse(
+            responseCode = "200",
+            description = "Programs page",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = PageResponseDTO.class))
+    )
     @GetMapping
-    ResponseEntity<Void> getPrograms();
+    ResponseEntity<PageResponseDTO<ProgramResponse>> getPrograms(
+            @Valid @ModelAttribute ProgramFilterRequest filter,
+            @ParameterObject
+            @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC)
+            Pageable pageable
+    ) throws BadRequestException;
 
-    @Operation(summary = "Get program by ID (future implementation)")
-    @ApiResponse(responseCode = "200", description = "Program details (not yet implemented)")
+    @Operation(summary = "Get program by ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Program found",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProgramResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Not found",
+                    content = @Content(mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ProblemDetail.class)))
+    })
     @GetMapping("/{programId}")
-    ResponseEntity<Void> getProgramById(@PathVariable Long programId);
+    ResponseEntity<ProgramResponse> getProgramById(
+            @Parameter(description = "Program ID", required = true)
+            @PathVariable Long programId
+    );
 
-    @Operation(summary = "Create a new program (future implementation)")
-    @ApiResponse(responseCode = "201", description = "Program created (not yet implemented)")
+    @Operation(summary = "Create a new program")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Program created",
+                    headers = @Header(name = "Location", description = "URI of the created program"),
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProgramResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request",
+                    content = @Content(mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ProblemDetail.class)))
+    })
     @PostMapping
-    ResponseEntity<Void> createProgram(@RequestBody ProgramRequest request);
+    ResponseEntity<ProgramResponse> createProgram(
+            @Valid @RequestBody ProgramRequest request
+    );
 
-    @Operation(summary = "Update a program (future implementation)")
-    @ApiResponse(responseCode = "200", description = "Program updated (not yet implemented)")
-    @PutMapping("/{programId}")
-    ResponseEntity<Void> updateProgram(@PathVariable Long programId, @RequestBody ProgramRequest request);
+    @Operation(summary = "Update an existing program")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Program updated",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProgramResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request",
+                    content = @Content(mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "404", description = "Not found",
+                    content = @Content(mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    @PatchMapping("/{programId}")
+    ResponseEntity<ProgramResponse> updateProgram(
+            @Parameter(description = "Program ID", required = true)
+            @PathVariable Long programId,
+            @Valid @RequestBody ProgramRequest request
+    );
 
-    @Operation(summary = "Delete a program (future implementation)")
-    @ApiResponse(responseCode = "204", description = "Program deleted (not yet implemented)")
+    @Operation(summary = "Delete a program")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Program deleted"),
+            @ApiResponse(responseCode = "404", description = "Not found",
+                    content = @Content(mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ProblemDetail.class)))
+    })
     @DeleteMapping("/{programId}")
-    ResponseEntity<Void> deleteProgram(@PathVariable Long programId);
+    ResponseEntity<Void> deleteProgram(
+            @PathVariable Long programId
+    );
 
     @Operation(summary = "Generate PDF for a training program")
     @ApiResponses({
@@ -46,8 +108,11 @@ public interface ProgramApi {
                     content = @Content(mediaType = "application/pdf")),
             @ApiResponse(responseCode = "400", description = "Invalid request",
                     content = @Content(mediaType = "application/problem+json",
-                            schema = @Schema(implementation = org.springframework.http.ProblemDetail.class)))
+                            schema = @Schema(implementation = ProblemDetail.class)))
     })
     @PostMapping("/pdf")
-    ResponseEntity<byte[]> generateProgramPdf(@Valid @RequestBody ProgramRequest request);
+    ResponseEntity<byte[]> generateProgramPdf(
+            @Valid @RequestBody ProgramRequest request
+    );
 }
+

@@ -15,5 +15,4 @@ public interface ExerciseService {
     ExerciseResponse createExercise(ExerciseCreateRequest request);
     ExerciseResponse updateExercise(Long id, ExerciseUpdateRequest request);
     void deleteExercise(Long id);
-
 }
