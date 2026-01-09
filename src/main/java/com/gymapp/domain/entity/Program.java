@@ -49,4 +49,9 @@ public class Program {
     @ManyToOne
     @JsonBackReference
     Client client;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "owner_id", nullable = false)
+    User owner;
+
 }
