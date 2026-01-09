@@ -7,6 +7,7 @@ import com.gymapp.api.dto.category.request.CategoryUpdateRequest;
 import com.gymapp.api.dto.category.response.CategoryResponse;
 import com.gymapp.domain.entity.Category;
 import com.gymapp.infrastructure.persistence.CategoryJpaRepository;
+import com.gymapp.infrastructure.persistence.ExerciseJpaRepository;
 import com.gymapp.shared.JsonTestUtils;
 import com.gymapp.shared.dto.PageResponseDTO;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,14 +40,18 @@ class CategoryControllerTestIT {
     private MockMvc mockMvc;
 
     @Autowired
-    private CategoryJpaRepository jpaRepository;
+    private CategoryJpaRepository categoryJpaRepository;
+
+    @Autowired
+    private ExerciseJpaRepository exerciseJpaRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
-        jpaRepository.deleteAll();
+        exerciseJpaRepository.deleteAll();
+        categoryJpaRepository.deleteAll();
         insertTestData();
     }
 
@@ -138,7 +143,7 @@ class CategoryControllerTestIT {
         String responseJson = result.getResponse().getContentAsString();
         CategoryResponse response = objectMapper.readValue(responseJson, CategoryResponse.class);
 
-        assertTrue(jpaRepository.existsById(response.getId()));
+        assertTrue(categoryJpaRepository.existsById(response.getId()));
     }
 
     @Test
@@ -211,7 +216,7 @@ class CategoryControllerTestIT {
         mockMvc.perform(delete("/api/categories/{id}", id))
                 .andExpect(status().isNoContent());
 
-        assertFalse(jpaRepository.existsById(id));
+        assertFalse(categoryJpaRepository.existsById(id));
     }
 
     @Test
@@ -247,11 +252,11 @@ class CategoryControllerTestIT {
                 Category.builder().name("Core").build()
         );
 
-        jpaRepository.saveAll(entities);
+        categoryJpaRepository.saveAll(entities);
     }
 
     private Long findIdByName(String name) {
-        return jpaRepository.findByNameIgnoreCase(name)
+        return categoryJpaRepository.findByNameIgnoreCase(name)
                 .map(Category::getId)
                 .orElseThrow(() -> new IllegalStateException(name + " not found in test data"));
     }
