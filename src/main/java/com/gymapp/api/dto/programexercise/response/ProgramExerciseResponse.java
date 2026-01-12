@@ -18,6 +18,9 @@ public class ProgramExerciseResponse {
     @Schema(description = "ID of the exercise associated with this program entry.", example = "1")
     Long exerciseId;
 
+    @Schema(description = "Name of the exercise associated with this program entry", example = "Bench press")
+    String exerciseName;
+
     @Schema(description = "Number of sets.", example = "4")
     String sets;
 

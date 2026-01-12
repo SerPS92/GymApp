@@ -9,5 +9,6 @@ import org.mapstruct.Mapping;
 public interface ProgramExerciseMapper {
 
     @Mapping(source = "exercise.id", target = "exerciseId")
+    @Mapping(source = "exercise.name", target = "exerciseName")
     ProgramExerciseResponse toResponse(ProgramExercise programExercise);
 }
