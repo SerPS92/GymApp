@@ -207,13 +207,9 @@ public class ProgramServiceImpl implements ProgramService{
 
     private void applyUpdates(Program program, ProgramRequest request) {
 
-        if (request.getStartDate() != null) {
-            program.setStartDate(request.getStartDate());
-        }
+        program.setStartDate(request.getStartDate());
+        program.setEndDate(request.getEndDate());
 
-        if (request.getEndDate() != null) {
-            program.setEndDate(request.getEndDate());
-        }
 
         if (request.getTitle() != null) {
             program.setTitle(request.getTitle());
