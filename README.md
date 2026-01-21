@@ -1,6 +1,6 @@
-# GymApp
+# GymPlanner
 
-GymApp es una aplicación web para **crear y organizar rutinas de entrenamiento de forma visual**, pensada principalmente para entrenadores personales y usuarios que trabajan con programas estructurados.
+GymPlanner es una aplicación web para **crear y organizar rutinas de entrenamiento de forma visual**, pensada principalmente para entrenadores personales y usuarios que trabajan con programas estructurados.
 
 El foco del proyecto está en la **planificación clara y rápida** de rutinas, permitiendo construir programas completos a partir de una biblioteca de ejercicios reutilizable.
 
