@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: gymapp
+    name: GymPlanner
 
   spring:
     datasource:
@@ -13,6 +13,7 @@ spring:
       password: ${PGPASSWORD}
 
   jpa:
+    defer-datasource-initialization: true
     hibernate:
       ddl-auto: create-drop
     show-sql: false
