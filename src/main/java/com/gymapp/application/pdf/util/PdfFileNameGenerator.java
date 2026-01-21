@@ -19,11 +19,11 @@ public class PdfFileNameGenerator {
                 ? request.getStartDate().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
                 : "";
 
-        return fileNameBuilder(title, clientName, date);
+        return fileNameBuilder(clientName, title, date);
     }
 
-    private static String fileNameBuilder(String title, String clientName, String date) {
-        return Stream.of(title, clientName, date)
+    private static String fileNameBuilder(String clientName, String title, String date) {
+        return Stream.of(clientName, title, date)
                 .filter(s -> s != null && !s.isBlank())
                 .collect(Collectors.joining("_"))
                 .concat(".pdf");
