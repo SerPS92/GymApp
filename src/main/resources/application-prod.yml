@@ -4,13 +4,11 @@ server:
 spring:
   application:
     name: GymPlanner
-
-  spring:
-    datasource:
-      driver-class-name: org.postgresql.Driver
-      url: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
-      username: ${PGUSER}
-      password: ${PGPASSWORD}
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
+    username: ${PGUSER}
+    password: ${PGPASSWORD}
 
   jpa:
     defer-datasource-initialization: true
