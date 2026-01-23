@@ -15,7 +15,9 @@ public class WebConfig {
             public void addCorsMappings(CorsRegistry registry) {
 
                 registry.addMapping("/api/**")
-                        .allowedOrigins("http://localhost:3000","https://demo.gymplannerapp.es", "front-gymapp.vercel.app")
+                        .allowedOrigins("http://localhost:3000",
+                                "https://demo.gymplannerapp.es",
+                                "https://front-gymapp.vercel.app/planner")
                         .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .exposedHeaders("Content-Disposition")
