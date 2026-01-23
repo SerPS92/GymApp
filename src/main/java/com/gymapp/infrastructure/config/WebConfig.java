@@ -17,7 +17,7 @@ public class WebConfig {
                 registry.addMapping("/api/**")
                         .allowedOrigins("http://localhost:3000",
                                 "https://demo.gymplannerapp.es",
-                                "https://front-gymapp.vercel.app/planner")
+                                "https://front-gymapp.vercel.app")
                         .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .exposedHeaders("Content-Disposition")
