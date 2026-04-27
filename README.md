@@ -97,14 +97,3 @@ La documentación facilita:
 ## Estado del proyecto
 
 Proyecto en fase demo, desarrollado como aplicación full stack de portfolio.
-
-El objetivo principal es demostrar capacidad para diseñar, implementar y desplegar una aplicación real usando Java, Spring Boot, PostgreSQL y React, aplicando buenas prácticas de backend, separación de responsabilidades, documentación de API y testing.
-
-## Próximas mejoras técnicas
-
-- Dockerización completa del entorno local
-- Pipeline CI/CD con ejecución automática de tests
-- Mejora de cobertura de pruebas
-- Observabilidad básica con health checks y logs estructurados
-- Generación/exportación avanzada de rutinas
-- Posible procesamiento asíncrono para tareas secundarias
